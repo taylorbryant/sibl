@@ -1,6 +1,6 @@
-# Siglum
+# Sibl
 
-Siglum is a composable, Next-native documentation library extracted from the shared architecture of the Tenchi and Beignet documentation sites. Next.js compiles and routes the MDX; Siglum supplies the typed information architecture, documentation shell, MDX components, search, themes, and human- and agent-readable outputs.
+Sibl is a composable, Next-native documentation library extracted from the shared architecture of the Tenchi and Beignet documentation sites. Next.js compiles and routes the MDX; Sibl supplies the typed information architecture, documentation shell, MDX components, search, themes, and human- and agent-readable outputs.
 
 The package is intentionally a library rather than a framework. There is no wrapper around `next dev`, no generated application, and no private content runtime.
 
@@ -20,15 +20,15 @@ Open [http://localhost:3000/docs](http://localhost:3000/docs).
 ## Install
 
 ```bash
-bun add siglum @next/mdx @mdx-js/loader @mdx-js/react
+bun add sibl @next/mdx @mdx-js/loader @mdx-js/react
 ```
 
 Import the visual system and pre-paint theme bootstrap once from your root layout:
 
 ```tsx
-import { DocsThemeScript } from "siglum/react";
-import "siglum/styles.css";
-import config from "@/siglum.config";
+import { DocsThemeScript } from "sibl/react";
+import "sibl/styles.css";
+import config from "@/sibl.config";
 
 export default function RootLayout({ children }) {
   return (
@@ -46,13 +46,13 @@ export default function RootLayout({ children }) {
 
 ## Configure MDX
 
-Siglum exposes serializable MDX options with GFM, stable heading IDs, and dual-theme Shiki highlighting. The Next integration stays visible in the application:
+Sibl exposes serializable MDX options with GFM, stable heading IDs, and dual-theme Shiki highlighting. The Next integration stays visible in the application:
 
 ```ts
 // next.config.ts
 import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
-import { createMdxOptions } from "siglum/mdx-config";
+import { createMdxOptions } from "sibl/mdx-config";
 
 const withMDX = createMDX({ options: createMdxOptions() });
 
@@ -63,12 +63,12 @@ const nextConfig: NextConfig = {
 export default withMDX(nextConfig);
 ```
 
-Connect Siglum's default MDX elements through Next's ordinary provider file:
+Connect Sibl's default MDX elements through Next's ordinary provider file:
 
 ```tsx
 // mdx-components.tsx
 import type { MDXComponents } from "mdx/types";
-import { createMdxComponents } from "siglum/mdx";
+import { createMdxComponents } from "sibl/mdx";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return createMdxComponents(components);
@@ -82,8 +82,8 @@ Pass overrides to `createMdxComponents` to replace any HTML element or add appli
 Every public page maps to an explicit source file. The manifest controls navigation and metadata without taking content compilation away from Next.js.
 
 ```ts
-// siglum.config.ts
-import { defineDocs } from "siglum";
+// sibl.config.ts
+import { defineDocs } from "sibl";
 
 export default defineDocs({
   title: "Acme",
@@ -114,8 +114,8 @@ Create the server-side documentation model:
 
 ```ts
 // lib/docs.ts
-import { createDocs } from "siglum/server";
-import config from "@/siglum.config";
+import { createDocs } from "sibl/server";
+import config from "@/sibl.config";
 
 export const docs = createDocs(config, { rootDir: process.cwd() });
 ```
@@ -138,7 +138,7 @@ export const content = {
 ```tsx
 // app/docs/[[...slug]]/page.tsx
 import { notFound } from "next/navigation";
-import { DocsPage } from "siglum/react";
+import { DocsPage } from "sibl/react";
 import { content } from "@/lib/content";
 import { docs } from "@/lib/docs";
 
@@ -178,12 +178,12 @@ Use route handlers when the Next deployment can generate them, or `writeOutputs`
 
 ## Package exports
 
-- `siglum` — configuration, navigation, and search primitives
-- `siglum/server` — source validation and generated outputs
-- `siglum/react` — composable documentation UI
-- `siglum/mdx` — default MDX components and `Callout`
-- `siglum/mdx-config` — serializable Next MDX compiler options
-- `siglum/styles.css` — default responsive light/dark visual system
+- `sibl` — configuration, navigation, and search primitives
+- `sibl/server` — source validation and generated outputs
+- `sibl/react` — composable documentation UI
+- `sibl/mdx` — default MDX components and `Callout`
+- `sibl/mdx-config` — serializable Next MDX compiler options
+- `sibl/styles.css` — default responsive light/dark visual system
 
 ## Development
 

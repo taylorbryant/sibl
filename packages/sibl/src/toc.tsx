@@ -17,7 +17,7 @@ export function DocsTableOfContents({ minimumHeadings = 2 }) {
   useEffect(() => {
     const elements = Array.from(
       document.querySelectorAll<HTMLElement>(
-        ".siglum-article h2[id], .siglum-article h3[id]",
+        ".sibl-article h2[id], .sibl-article h3[id]",
       ),
     );
     if (elements.length < minimumHeadings) {
@@ -68,7 +68,7 @@ export function DocsTableOfContents({ minimumHeadings = 2 }) {
   if (headings.length === 0) return null;
 
   return (
-    <nav aria-label="On this page" className="siglum-toc-nav">
+    <nav aria-label="On this page" className="sibl-toc-nav">
       <p>On this page</p>
       <ol>
         {headings.map((heading) => (

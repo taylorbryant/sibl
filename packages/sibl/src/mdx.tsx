@@ -24,7 +24,7 @@ function HeadingAnchor({
       {id ? (
         <a
           aria-label={`Link to ${typeof children === "string" ? children : "section"}`}
-          className="siglum-heading-anchor"
+          className="sibl-heading-anchor"
           href={`#${id}`}
         >
           {children}
@@ -67,8 +67,8 @@ export function createMdxComponents(
     pre: ({ children, ...props }) => {
       const language = codeLanguage(children);
       return (
-        <div className="siglum-code-block" data-siglum-code-block>
-          <div className="siglum-code-actions">
+        <div className="sibl-code-block" data-sibl-code-block>
+          <div className="sibl-code-actions">
             {language ? <span>{language}</span> : null}
             <CopyButton />
           </div>
@@ -77,7 +77,7 @@ export function createMdxComponents(
       );
     },
     table: ({ children, ...props }) => (
-      <div className="siglum-table-scroll">
+      <div className="sibl-table-scroll">
         <table {...props}>{children}</table>
       </div>
     ),

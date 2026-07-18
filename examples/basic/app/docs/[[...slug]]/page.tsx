@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DocsPage } from "siglum/react";
+import { DocsPage } from "sibl/react";
 import { docsContent } from "@/lib/content";
 import { docs } from "@/lib/docs";
 
@@ -43,8 +43,8 @@ export default async function DocumentationPage({
     <DocsPage
       config={docs.config}
       page={page}
-      sidebarFooter={<span>siglum v0.1.0</span>}
-      footer={<span>Built with Siglum and ordinary Next.js routes.</span>}
+      sidebarFooter={<span>sibl v0.1.0</span>}
+      footer={<span>Built with Sibl and ordinary Next.js routes.</span>}
     >
       <Content />
     </DocsPage>

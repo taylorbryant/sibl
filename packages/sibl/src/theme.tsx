@@ -27,7 +27,7 @@ function applyTheme(theme: Theme): void {
 
 export function useDocsTheme(storageKey: string) {
   const [theme, setThemeState] = useState<Theme>("system");
-  const changeEvent = `siglum-theme-change:${storageKey}`;
+  const changeEvent = `sibl-theme-change:${storageKey}`;
 
   useEffect(() => {
     const sync = () => {
@@ -79,8 +79,8 @@ export function ThemeToggle({ storageKey }: { storageKey: string }) {
   const { setTheme, theme } = useDocsTheme(storageKey);
 
   return (
-    <fieldset className="siglum-theme-toggle" aria-label="Theme">
-      <legend className="siglum-sr-only">Theme</legend>
+    <fieldset className="sibl-theme-toggle" aria-label="Theme">
+      <legend className="sibl-sr-only">Theme</legend>
       {themeOptions.map((option) => (
         <button
           key={option.value}

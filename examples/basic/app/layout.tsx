@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
-import { DocsThemeScript } from "siglum/react";
-import "siglum/styles.css";
-import config from "@/siglum.config";
+import { DocsThemeScript } from "sibl/react";
+import "sibl/styles.css";
+import config from "@/sibl.config";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Siglum",
-    template: "%s · Siglum",
+    default: "Sibl",
+    template: "%s · Sibl",
   },
   description:
     "Explicit, Next-native documentation primitives for people and agents.",

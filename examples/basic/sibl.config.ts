@@ -1,17 +1,17 @@
-import { defineDocs } from "siglum";
+import { defineDocs } from "sibl";
 
 export default defineDocs({
-  title: "Siglum",
+  title: "Sibl",
   description:
     "Explicit, Next-native documentation primitives for people and agents.",
   basePath: "/docs",
-  siteUrl: "https://use-siglum.dev",
+  siteUrl: "https://use-sibl.dev",
   navigation: [
     {
       label: "Getting started",
       items: [
         {
-          title: "What is Siglum?",
+          title: "What is Sibl?",
           slug: "",
           source: "content/docs/index.mdx",
           eyebrow: "Documentation infrastructure",
@@ -23,14 +23,15 @@ export default defineDocs({
           slug: "installation",
           source: "content/docs/installation.mdx",
           eyebrow: "Getting started",
-          description: "Add Siglum to an existing Next.js application.",
+          description: "Add Sibl to an existing Next.js application.",
         },
         {
           title: "Architecture",
           slug: "architecture",
           source: "content/docs/architecture.mdx",
           eyebrow: "Design",
-          description: "Understand what Siglum owns—and what it deliberately leaves to Next.js.",
+          description:
+            "Understand what Sibl owns—and what it deliberately leaves to Next.js.",
         },
       ],
     },
@@ -42,14 +43,16 @@ export default defineDocs({
           slug: "configuration",
           source: "content/docs/configuration.mdx",
           eyebrow: "Reference",
-          description: "Define navigation and project metadata in one typed manifest.",
+          description:
+            "Define navigation and project metadata in one typed manifest.",
         },
         {
           title: "Agent outputs",
           slug: "agent-outputs",
           source: "content/docs/agent-outputs.mdx",
           eyebrow: "Agents and search",
-          description: "Publish the same documentation corpus for humans, search, and agents.",
+          description:
+            "Publish the same documentation corpus for humans, search, and agents.",
           badge: "AI",
         },
       ],
@@ -60,6 +63,6 @@ export default defineDocs({
     accent: "#6658d3",
     accentDark: "#9b91ff",
     mark: "§",
-    storageKey: "siglum-example-theme",
+    storageKey: "sibl-example-theme",
   },
 });

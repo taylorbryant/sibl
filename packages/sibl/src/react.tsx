@@ -26,22 +26,22 @@ function NavigationSections({
   navigation: NavigationSection[];
 }) {
   return navigation.map((section) => (
-    <section className="siglum-nav-section" key={section.label}>
-      <p className="siglum-nav-label">{section.label}</p>
-      <ul className="siglum-nav-list">
+    <section className="sibl-nav-section" key={section.label}>
+      <p className="sibl-nav-label">{section.label}</p>
+      <ul className="sibl-nav-list">
         {section.items.map((item) => {
           const active = item.slug === currentSlug;
           return (
             <li key={item.slug || "index"}>
               <Link
                 aria-current={active ? "page" : undefined}
-                className="siglum-nav-link"
+                className="sibl-nav-link"
                 data-active={active || undefined}
                 href={pageHref(config, item.slug)}
               >
                 <span>{item.navLabel ?? item.title}</span>
                 {item.badge ? (
-                  <span className="siglum-badge">{item.badge}</span>
+                  <span className="sibl-badge">{item.badge}</span>
                 ) : null}
               </Link>
             </li>
@@ -102,13 +102,13 @@ export function DocsLayout({
   sidebarFooter,
 }: DocsLayoutProps) {
   const style = {
-    "--siglum-accent": config.theme.accent,
-    "--siglum-accent-dark": config.theme.accentDark,
+    "--sibl-accent": config.theme.accent,
+    "--sibl-accent-dark": config.theme.accentDark,
   } as CSSProperties;
 
   const brandContent = brand ?? (
     <>
-      <span aria-hidden="true" className="siglum-mark">
+      <span aria-hidden="true" className="sibl-mark">
         {config.theme.mark}
       </span>
       <span>{config.title}</span>
@@ -116,18 +116,18 @@ export function DocsLayout({
   );
 
   return (
-    <div className={classNames("siglum-root", className)} style={style}>
-      <a className="siglum-skip-link" href="#siglum-content">
+    <div className={classNames("sibl-root", className)} style={style}>
+      <a className="sibl-skip-link" href="#sibl-content">
         Skip to content
       </a>
-      <header className="siglum-header">
-        <div className="siglum-header-inner">
-          <Link className="siglum-brand" href={config.basePath}>
+      <header className="sibl-header">
+        <div className="sibl-header-inner">
+          <Link className="sibl-brand" href={config.basePath}>
             {brandContent}
           </Link>
-          <div className="siglum-header-actions">
+          <div className="sibl-header-actions">
             {config.links.length > 0 ? (
-              <nav aria-label="Project" className="siglum-project-links">
+              <nav aria-label="Project" className="sibl-project-links">
                 {config.links.map((link) => (
                   <a href={link.href} key={link.href}>
                     {link.label}
@@ -149,30 +149,30 @@ export function DocsLayout({
         </div>
       </header>
 
-      <div className="siglum-mobile-nav">
+      <div className="sibl-mobile-nav">
         <details>
           <summary>Browse documentation</summary>
           <DocsNavigation config={config} currentSlug={currentSlug} />
         </details>
       </div>
 
-      <div className="siglum-grid">
-        <aside className="siglum-sidebar">
+      <div className="sibl-grid">
+        <aside className="sibl-sidebar">
           <DocsNavigation config={config} currentSlug={currentSlug} />
           {sidebarFooter ? (
-            <div className="siglum-sidebar-footer">{sidebarFooter}</div>
+            <div className="sibl-sidebar-footer">{sidebarFooter}</div>
           ) : null}
         </aside>
 
-        <main className="siglum-main" id="siglum-content">
+        <main className="sibl-main" id="sibl-content">
           {children}
         </main>
 
-        <aside className="siglum-toc">
+        <aside className="sibl-toc">
           {showTableOfContents ? <DocsTableOfContents /> : null}
         </aside>
       </div>
-      {footer ? <footer className="siglum-footer">{footer}</footer> : null}
+      {footer ? <footer className="sibl-footer">{footer}</footer> : null}
     </div>
   );
 }
@@ -184,7 +184,7 @@ export interface DocsArticleProps {
 
 export function DocsArticle({ children, className }: DocsArticleProps) {
   return (
-    <article className={classNames("siglum-article", "siglum-prose", className)}>
+    <article className={classNames("sibl-article", "sibl-prose", className)}>
       {children}
     </article>
   );
@@ -192,9 +192,9 @@ export function DocsArticle({ children, className }: DocsArticleProps) {
 
 export function DocsPageHeader({ page }: { page: DocsPageData }) {
   return (
-    <header className="siglum-page-header">
+    <header className="sibl-page-header">
       {page.eyebrow ?? page.section ? (
-        <p className="siglum-eyebrow">{page.eyebrow ?? page.section}</p>
+        <p className="sibl-eyebrow">{page.eyebrow ?? page.section}</p>
       ) : null}
       <h1>{page.title}</h1>
       {page.description ? <p>{page.description}</p> : null}
@@ -212,7 +212,7 @@ export function DocsPagination({ config, currentSlug }: DocsPaginationProps) {
   if (!adjacent.previous && !adjacent.next) return null;
 
   return (
-    <nav aria-label="Pagination" className="siglum-pagination">
+    <nav aria-label="Pagination" className="sibl-pagination">
       {adjacent.previous ? (
         <Link href={pageHref(config, adjacent.previous.slug)} rel="prev">
           <span>Previous</span>
@@ -223,7 +223,7 @@ export function DocsPagination({ config, currentSlug }: DocsPaginationProps) {
       )}
       {adjacent.next ? (
         <Link
-          className="siglum-pagination-next"
+          className="sibl-pagination-next"
           href={pageHref(config, adjacent.next.slug)}
           rel="next"
         >

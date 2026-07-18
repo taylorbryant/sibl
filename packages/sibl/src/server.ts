@@ -30,8 +30,8 @@ export interface WriteDocsOutputsOptions {
   outputDir?: string;
 }
 
-export class SiglumContentError extends Error {
-  override name = "SiglumContentError";
+export class SiblContentError extends Error {
+  override name = "SiblContentError";
 }
 
 function absolutePageHref(config: DocsConfig, slug: string): string {
@@ -149,7 +149,7 @@ export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
         "code" in error &&
         error.code === "ENOENT"
       ) {
-        throw new SiglumContentError(
+        throw new SiblContentError(
           `No MDX source found for "${page.title}". Expected ${page.source}.`,
         );
       }

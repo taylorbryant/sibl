@@ -12,11 +12,11 @@ export function Callout({
   type = "note",
 }: CalloutProps) {
   return (
-    <aside className="siglum-callout" data-type={type}>
-      <p className="siglum-callout-title">
+    <aside className="sibl-callout" data-type={type}>
+      <p className="sibl-callout-title">
         {title ?? (type === "warning" ? "Warning" : "Note")}
       </p>
-      <div className="siglum-callout-content">{children}</div>
+      <div className="sibl-callout-content">{children}</div>
     </aside>
   );
 }

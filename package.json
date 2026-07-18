@@ -1,5 +1,5 @@
 {
-  "name": "siglum-workspace",
+  "name": "sibl-workspace",
   "private": true,
   "type": "module",
   "packageManager": "bun@1.3.14",
@@ -9,11 +9,11 @@
   ],
   "scripts": {
     "build": "bun run build:package && bun run build:example",
-    "build:package": "bun run --cwd packages/siglum build",
+    "build:package": "bun run --cwd packages/sibl build",
     "build:example": "bun run --cwd examples/basic build",
     "dev": "bun run build:package && bun run --cwd examples/basic dev",
     "test": "bun test",
-    "typecheck": "bun run build:package && bun run --cwd packages/siglum typecheck && bun run --cwd examples/basic typecheck",
+    "typecheck": "bun run build:package && bun run --cwd packages/sibl typecheck && bun run --cwd examples/basic typecheck",
     "check": "bun run typecheck && bun run test && bun run build"
   },
   "devDependencies": {

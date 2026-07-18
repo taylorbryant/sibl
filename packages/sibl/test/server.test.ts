@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { defineDocs } from "../src/config.js";
 import {
-  SiglumContentError,
+  SiblContentError,
   cleanMdx,
   createDocs,
   extractHeadings,
@@ -22,17 +22,17 @@ afterEach(async () => {
 });
 
 async function fixture() {
-  const rootDir = await mkdtemp(path.join(tmpdir(), "siglum-test-"));
+  const rootDir = await mkdtemp(path.join(tmpdir(), "sibl-test-"));
   temporaryDirectories.push(rootDir);
   const contentDir = path.join(rootDir, "content");
   await mkdir(contentDir, { recursive: true });
   await writeFile(
     path.join(contentDir, "index.mdx"),
-    `import { Callout } from "siglum/react";\n\n# Welcome\n\nWelcome to **Siglum**.\n\n<Callout>One source.</Callout>\n\n## First section\n\nHello.\n`,
+    `import { Callout } from "sibl/react";\n\n# Welcome\n\nWelcome to **Sibl**.\n\n<Callout>One source.</Callout>\n\n## First section\n\nHello.\n`,
   );
   await writeFile(
     path.join(contentDir, "install.mdx"),
-    `# Installation\n\nInstall with \`bun add siglum\`.\n\n## Repeat\n\nOne.\n\n## Repeat\n\nTwo.\n`,
+    `# Installation\n\nInstall with \`bun add sibl\`.\n\n## Repeat\n\nOne.\n\n## Repeat\n\nTwo.\n`,
   );
 
   const config = defineDocs({
@@ -93,7 +93,7 @@ describe("createDocs", () => {
     );
 
     const fullText = await docs.getLlmsFullText();
-    expect(fullText).toContain("Install with `bun add siglum`");
+    expect(fullText).toContain("Install with `bun add sibl`");
     expect(fullText).not.toContain("import { Callout }");
 
     const index = await docs.getSearchIndex();
@@ -148,7 +148,7 @@ describe("createDocs", () => {
     });
     const docs = createDocs(broken, { rootDir });
 
-    await expect(docs.validate()).rejects.toBeInstanceOf(SiglumContentError);
+    await expect(docs.validate()).rejects.toBeInstanceOf(SiblContentError);
     await expect(docs.validate()).rejects.toThrow("content/missing.mdx");
   });
 });

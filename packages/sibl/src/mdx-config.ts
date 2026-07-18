@@ -14,11 +14,11 @@ export function createMdxOptions(
   options: CreateMdxOptions = {},
 ): MdxProcessorOptions {
   return {
-    remarkPlugins: ["siglum/remark-gfm"],
+    remarkPlugins: ["sibl/remark-gfm"],
     rehypePlugins: [
-      "siglum/rehype-slug",
+      "sibl/rehype-slug",
       [
-        "siglum/rehype-shiki",
+        "sibl/rehype-shiki",
         {
           addLanguageClass: true,
           themes: options.themes ?? {

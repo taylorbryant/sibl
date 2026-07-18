@@ -1,4 +1,4 @@
-Siglum separates the documentation problem into three layers. Applications can adopt the complete default or compose the individual pieces themselves.
+Sibl separates the documentation problem into three layers. Applications can adopt the complete default or compose the individual pieces themselves.
 
 ## The typed manifest
 
@@ -8,7 +8,7 @@ The manifest is deliberately more explicit than filesystem-derived navigation. M
 
 ## Next-compiled MDX
 
-Next.js imports and compiles every MDX module. Siglum never evaluates MDX source at request time. A small content registry connects the manifest slug to the statically imported component:
+Next.js imports and compiles every MDX module. Sibl never evaluates MDX source at request time. A small content registry connects the manifest slug to the statically imported component:
 
 ```ts
 import Overview from "@/content/docs/index.mdx";
@@ -20,7 +20,7 @@ export const content = {
 };
 ```
 
-Siglum reads the raw source only when validating content or producing search and agent outputs.
+Sibl reads the raw source only when validating content or producing search and agent outputs.
 
 ## The composable React surface
 
@@ -34,4 +34,4 @@ The layout remains a Server Component. JavaScript is limited to behavior that ne
 
 ## The framework boundary
 
-Siglum does not wrap `next dev`, hide routes, generate an application, or invent a deployment pipeline. This is an architectural constraint, not a missing feature.
+Sibl does not wrap `next dev`, hide routes, generate an application, or invent a deployment pipeline. This is an architectural constraint, not a missing feature.

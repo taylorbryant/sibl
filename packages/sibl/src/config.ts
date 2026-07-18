@@ -105,14 +105,14 @@ export const docsConfigSchema = z
           .regex(/^[a-zA-Z0-9._:-]+$/, {
             message: "theme.storageKey may only contain letters, numbers, ., _, :, and -",
           })
-          .default("siglum-theme"),
+          .default("sibl-theme"),
       })
       .strict()
       .default({
         accent: "#6658d3",
         accentDark: "#9b91ff",
         mark: "§",
-        storageKey: "siglum-theme",
+        storageKey: "sibl-theme",
       }),
   })
   .strict()

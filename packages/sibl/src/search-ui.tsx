@@ -135,7 +135,7 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
 
   return createPortal(
     <div
-      className="siglum-search-backdrop"
+      className="sibl-search-backdrop"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -144,10 +144,10 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
         role="dialog"
         aria-label="Search documentation"
         aria-modal="true"
-        className="siglum-search-dialog"
+        className="sibl-search-dialog"
         onKeyDown={onKeyDown}
       >
-        <div className="siglum-search-field">
+        <div className="sibl-search-field">
           <span aria-hidden="true">⌕</span>
           <input
             ref={inputRef}
@@ -157,10 +157,10 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
               setActiveIndex(0);
             }}
             aria-activedescendant={
-              results.length > 0 ? `siglum-search-option-${activeIndex}` : undefined
+              results.length > 0 ? `sibl-search-option-${activeIndex}` : undefined
             }
             aria-autocomplete="list"
-            aria-controls="siglum-search-results"
+            aria-controls="sibl-search-results"
             aria-expanded={results.length > 0}
             aria-label="Search documentation"
             autoComplete="off"
@@ -176,10 +176,10 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
 
         <div
           ref={listRef}
-          id="siglum-search-results"
+          id="sibl-search-results"
           role="listbox"
           aria-label="Search results"
-          className="siglum-search-results"
+          className="sibl-search-results"
         >
           {loadError ? <p>Search is unavailable right now.</p> : null}
           {!loadError && entries === null ? <p>Loading search index…</p> : null}
@@ -192,28 +192,28 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
             return (
               <div key={resultHref(result)}>
                 {showSection ? (
-                  <div className="siglum-search-section">
+                  <div className="sibl-search-section">
                     {result.entry.sectionLabel}
                   </div>
                 ) : null}
                 <button
-                  id={`siglum-search-option-${index}`}
+                  id={`sibl-search-option-${index}`}
                   role="option"
                   aria-selected={index === activeIndex}
                   tabIndex={-1}
                   type="button"
-                  className="siglum-search-result"
+                  className="sibl-search-result"
                   onClick={() => go(result)}
                   onMouseMove={() => setActiveIndex(index)}
                 >
-                  <span className="siglum-search-result-title">
+                  <span className="sibl-search-result-title">
                     <Highlight text={result.entry.heading} terms={terms} />
                     {result.entry.headingId ? (
                       <small>{result.entry.pageTitle}</small>
                     ) : null}
                   </span>
                   {result.snippet ? (
-                    <span className="siglum-search-snippet">
+                    <span className="sibl-search-snippet">
                       <Highlight text={result.snippet} terms={terms} />
                     </span>
                   ) : null}
@@ -223,7 +223,7 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
           })}
         </div>
 
-        <div className="siglum-search-help">
+        <div className="sibl-search-help">
           <span>↑↓ navigate</span>
           <span>↵ open</span>
           <span>esc close</span>
@@ -268,7 +268,7 @@ export function SearchButton({
     <>
       <button
         ref={buttonRef}
-        className="siglum-search-button"
+        className="sibl-search-button"
         type="button"
         aria-expanded={open}
         aria-haspopup="dialog"

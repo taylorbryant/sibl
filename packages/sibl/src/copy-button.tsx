@@ -7,7 +7,7 @@ export function CopyButton() {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
-    const root = buttonRef.current?.closest("[data-siglum-code-block]");
+    const root = buttonRef.current?.closest("[data-sibl-code-block]");
     const source = root?.querySelector("pre code")?.textContent;
     if (!source) return;
 
@@ -19,7 +19,7 @@ export function CopyButton() {
   return (
     <button
       ref={buttonRef}
-      className="siglum-copy-button"
+      className="sibl-copy-button"
       type="button"
       onClick={copy}
       aria-label={copied ? "Copied code" : "Copy code"}
