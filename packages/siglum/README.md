@@ -1,7 +1,11 @@
 # Siglum
 
-Explicit, Next-native documentation primitives for people and agents.
+Composable, Next-native documentation primitives for people and agents.
 
-Siglum provides a typed manifest, Markdown content source, default React documentation surface, JSON search index, and agent-readable text outputs without replacing Next.js routing or deployment.
+Siglum combines an explicit typed manifest with Next-compiled MDX, a responsive documentation shell, searchable heading-level output, `llms.txt`, and a full-text agent corpus. Next.js continues to own routing, rendering, and deployment.
 
-This package is pre-release. See the repository example for the complete integration.
+This package is a pre-release `0.1.0` candidate. The repository contains a complete App Router integration and API documentation.
+
+```bash
+bun add siglum @next/mdx @mdx-js/loader @mdx-js/react
+```

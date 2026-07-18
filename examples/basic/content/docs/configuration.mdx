@@ -1,0 +1,56 @@
+The config is both a runtime-validated object and the source of the public navigation hierarchy.
+
+## Project fields
+
+| Field | Default | Purpose |
+| --- | --- | --- |
+| `title` | required | Product or project name |
+| `description` | required | Site and agent-output summary |
+| `basePath` | `/docs` | Route prefix for documentation |
+| `siteUrl` | — | Optional origin for canonical agent links |
+| `links` | `[]` | Project links shown in the header |
+| `outputs` | standard paths | Locations for search and agent outputs |
+| `search` | enabled | Search visibility and placeholder |
+| `theme` | Siglum defaults | Light/dark accents, mark, and storage key |
+
+## Navigation sections
+
+Each section has a label and one or more page entries. A page entry maps its public slug to an explicit `.md` or `.mdx` source.
+
+```ts
+{
+  label: "Reference",
+  items: [
+    {
+      title: "Configuration",
+      navLabel: "Config",
+      slug: "configuration",
+      source: "content/docs/configuration.mdx",
+      description: "Every supported configuration field.",
+      eyebrow: "Reference",
+      badge: "API",
+    },
+  ],
+}
+```
+
+Slugs use lowercase URL segments such as `guides/deployment`. The root page uses an empty slug. Source paths must stay inside the application root.
+
+## Composition settings
+
+UI customization is passed as React props rather than stored in the serializable manifest:
+
+```tsx
+<DocsPage
+  config={docs.config}
+  page={page}
+  brand={<ProductLogo />}
+  headerActions={<StatusLink />}
+  sidebarFooter={<Version />}
+  footer={<LegalLinks />}
+>
+  <Content />
+</DocsPage>
+```
+
+Applications that render their own MDX title can set `showPageHeader={false}`.

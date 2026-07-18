@@ -1,46 +1,24 @@
-import { access, readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { parse as parseYaml } from "yaml";
-import { z } from "zod";
+import GithubSlugger from "github-slugger";
 import type { DocsConfig, NavigationSection } from "./config.js";
-import {
-  extractHeadings,
-  stripMarkdown,
-  type DocsHeading,
-} from "./markdown.js";
+import { cleanMdx, extractHeadings, stripMarkdown } from "./markdown.js";
 import {
   findNavigationItem,
   flattenNavigation,
   normalizeSlug,
   pageHref,
 } from "./navigation.js";
-
-const pageMatterSchema = z
-  .object({
-    description: z.string().trim().min(1).optional(),
-    eyebrow: z.string().trim().min(1).optional(),
-  })
-  .passthrough();
+import type { SearchEntry } from "./search.js";
 
 export interface DocsPage {
-  body: string;
   description?: string;
   eyebrow?: string;
-  headings: DocsHeading[];
   href: string;
   section: string;
   segments: string[];
   slug: string;
-  sourcePath: string;
-  title: string;
-}
-
-export interface SearchIndexItem {
-  content: string;
-  description?: string;
-  href: string;
-  id: string;
-  section: string;
+  source: string;
   title: string;
 }
 
@@ -48,56 +26,12 @@ export interface CreateDocsOptions {
   rootDir: string;
 }
 
+export interface WriteDocsOutputsOptions {
+  outputDir?: string;
+}
+
 export class SiglumContentError extends Error {
   override name = "SiglumContentError";
-}
-
-function parseFrontmatter(source: string): {
-  content: string;
-  data: unknown;
-} {
-  const normalized = source.replace(/^\uFEFF/, "");
-  const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(normalized);
-  if (!match) return { content: normalized, data: {} };
-
-  let data: unknown;
-  try {
-    data = parseYaml(match[1] ?? "") ?? {};
-  } catch (error) {
-    throw new SiglumContentError(
-      `Could not parse page frontmatter: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
-
-  return {
-    content: normalized.slice(match[0].length),
-    data,
-  };
-}
-
-async function firstReadableFile(
-  candidates: string[],
-): Promise<string | undefined> {
-  for (const candidate of candidates) {
-    try {
-      await access(/* turbopackIgnore: true */ candidate);
-      return candidate;
-    } catch {
-      // Keep looking. The final error lists every supported location.
-    }
-  }
-  return undefined;
-}
-
-function fileCandidates(contentRoot: string, slug: string): string[] {
-  if (!slug) {
-    return [path.join(/* turbopackIgnore: true */ contentRoot, "index.md")];
-  }
-
-  return [
-    path.join(/* turbopackIgnore: true */ contentRoot, `${slug}.md`),
-    path.join(/* turbopackIgnore: true */ contentRoot, slug, "index.md"),
-  ];
 }
 
 function absolutePageHref(config: DocsConfig, slug: string): string {
@@ -105,71 +39,135 @@ function absolutePageHref(config: DocsConfig, slug: string): string {
   return config.siteUrl ? new URL(href, config.siteUrl).toString() : href;
 }
 
-export function createDocs(
+function descriptor(
   config: DocsConfig,
-  options: CreateDocsOptions,
-) {
-  const rootDir = path.resolve(
-    /* turbopackIgnore: true */ options.rootDir,
-  );
-  const contentRoot = path.resolve(
-    /* turbopackIgnore: true */ rootDir,
-    config.contentDir,
-  );
+  item: ReturnType<typeof flattenNavigation>[number],
+): DocsPage {
+  return {
+    description: item.description,
+    eyebrow: item.eyebrow,
+    href: pageHref(config, item.slug),
+    section: item.section,
+    segments: item.slug ? item.slug.split("/") : [],
+    slug: item.slug,
+    source: item.source,
+    title: item.title,
+  };
+}
 
-  async function loadPage(slug: string): Promise<DocsPage | null> {
-    const item = findNavigationItem(config, slug);
-    if (!item) return null;
+function cleanSearchLine(value: string): string {
+  return value
+    .replace(/^\s*>+\s?/, "")
+    .replace(/^\s*([-+*]|\d+\.)\s+/, "")
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/<\/?[A-Za-z][^<>]*\/?>/g, " ")
+    .replace(/[`*|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-    const candidates = fileCandidates(contentRoot, item.slug);
-    const sourcePath = await firstReadableFile(candidates);
-    if (!sourcePath) {
-      const relativeCandidates = candidates.map((candidate) =>
-        path.relative(rootDir, candidate),
-      );
-      throw new SiglumContentError(
-        `No Markdown file found for "${item.title}". Expected ${relativeCandidates.join(" or ")}.`,
-      );
+function searchEntriesForPage(page: DocsPage, source: string): SearchEntry[] {
+  const maximumBodyLength = 600;
+  const slugger = new GithubSlugger();
+  const sections: Array<{
+    heading: string;
+    headingId: string;
+    prose: string[];
+    code: string[];
+  }> = [
+    { heading: page.title, headingId: "", prose: [], code: [] },
+  ];
+  let current = sections[0];
+  let inFence = false;
+
+  for (const line of cleanMdx(source).split("\n")) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) {
+      const code = line.trim();
+      if (code) current?.code.push(code);
+      continue;
     }
 
-    const source = await readFile(
-      /* turbopackIgnore: true */ sourcePath,
-      "utf8",
-    );
-    const parsed = parseFrontmatter(source);
-    const frontmatter = pageMatterSchema.parse(parsed.data);
+    const headingMatch = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
+    if (headingMatch) {
+      const heading = cleanSearchLine(headingMatch[2] ?? "");
+      const headingId = slugger.slug(heading);
+      const depth = headingMatch[1]?.length ?? 0;
+      if (depth === 2 || depth === 3) {
+        current = { heading, headingId, prose: [], code: [] };
+        sections.push(current);
+      }
+      continue;
+    }
 
+    const prose = cleanSearchLine(line);
+    if (prose) current?.prose.push(prose);
+  }
+
+  return sections.map((section) => {
+    const prose = section.prose.join(" ");
+    const room = Math.max(0, maximumBodyLength - prose.length);
+    const code = section.code.join(" ").slice(0, room);
     return {
-      body: parsed.content.trim(),
-      description: frontmatter.description ?? item.description,
-      eyebrow: frontmatter.eyebrow,
-      headings: extractHeadings(parsed.content),
-      href: pageHref(config, item.slug),
-      section: item.section,
-      segments: item.slug ? item.slug.split("/") : [],
-      slug: item.slug,
-      sourcePath,
-      title: item.title,
+      route: page.href,
+      pageTitle: page.title,
+      sectionLabel: page.section,
+      heading: section.heading,
+      headingId: section.headingId,
+      body: `${prose} ${code}`.trim().slice(0, maximumBodyLength),
     };
+  });
+}
+
+function outputFilePath(outputDir: string, routePath: string): string {
+  return path.join(outputDir, routePath.replace(/^\/+/, ""));
+}
+
+export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
+  const rootDir = path.resolve(/* turbopackIgnore: true */ options.rootDir);
+  const pages = flattenNavigation(config.navigation).map((item) =>
+    descriptor(config, item),
+  );
+
+  function sourcePath(page: DocsPage): string {
+    return path.resolve(/* turbopackIgnore: true */ rootDir, page.source);
   }
 
-  async function getPage(
-    slug?: string | string[],
-  ): Promise<DocsPage | null> {
-    return loadPage(normalizeSlug(slug));
+  async function readPageSource(page: DocsPage): Promise<string> {
+    try {
+      return await readFile(
+        /* turbopackIgnore: true */ sourcePath(page),
+        "utf8",
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code === "ENOENT"
+      ) {
+        throw new SiglumContentError(
+          `No MDX source found for "${page.title}". Expected ${page.source}.`,
+        );
+      }
+      throw error;
+    }
   }
 
-  async function getPages(): Promise<DocsPage[]> {
-    const pages = await Promise.all(
-      flattenNavigation(config.navigation).map((item) => loadPage(item.slug)),
-    );
-    return pages.filter((page): page is DocsPage => page !== null);
+  function getPage(slug?: string | string[]): DocsPage | null {
+    const item = findNavigationItem(config, normalizeSlug(slug));
+    return item ? descriptor(config, item) : null;
+  }
+
+  function getPages(): DocsPage[] {
+    return pages.slice();
   }
 
   function generateStaticParams(): Array<{ slug: string[] }> {
-    return flattenNavigation(config.navigation).map((item) => ({
-      slug: item.slug ? item.slug.split("/") : [],
-    }));
+    return pages.map((page) => ({ slug: page.segments }));
   }
 
   async function getLlmsText(): Promise<string> {
@@ -185,43 +183,81 @@ export function createDocs(
       }
     }
 
+    lines.push(
+      "",
+      "## Full documentation",
+      "",
+      `- [llms-full.txt](${config.siteUrl ? new URL(config.outputs.llmsFull, config.siteUrl).toString() : config.outputs.llmsFull}): Full text of every documentation page.`,
+    );
+
     return `${lines.join("\n")}\n`;
   }
 
   async function getLlmsFullText(): Promise<string> {
-    const pages = await getPages();
-    const lines = [`# ${config.title}`, "", `> ${config.description}`];
-
-    for (const page of pages) {
-      lines.push(
-        "",
-        "---",
-        "",
-        `## ${page.title}`,
-        "",
+    const sources = await Promise.all(
+      pages.map(async (page) => ({ page, source: await readPageSource(page) })),
+    );
+    const sections = sources.map(({ page, source }) =>
+      [
+        `# ${page.title}`,
         `Source: ${absolutePageHref(config, page.slug)}`,
-      );
-      if (page.description) lines.push("", page.description);
-      lines.push("", page.body);
-    }
+        "",
+        cleanMdx(source).replace(/^#\s+.+(?:\r?\n)+/, ""),
+      ]
+        .join("\n")
+        .trim(),
+    );
 
-    return `${lines.join("\n")}\n`;
+    return `${sections.join("\n\n---\n\n")}\n`;
   }
 
-  async function getSearchIndex(): Promise<SearchIndexItem[]> {
-    const pages = await getPages();
-    return pages.map((page) => ({
-      content: stripMarkdown(page.body),
-      description: page.description,
-      href: page.href,
-      id: page.slug || "index",
-      section: page.section,
-      title: page.title,
-    }));
+  async function getSearchIndex(): Promise<SearchEntry[]> {
+    const entries = await Promise.all(
+      pages.map(async (page) =>
+        searchEntriesForPage(page, await readPageSource(page)),
+      ),
+    );
+    return entries.flat();
   }
 
   async function validate(): Promise<void> {
-    await getPages();
+    await Promise.all(
+      pages.map(async (page) => {
+        const source = await readPageSource(page);
+        extractHeadings(source);
+        stripMarkdown(source);
+      }),
+    );
+  }
+
+  async function writeOutputs(
+    writeOptions: WriteDocsOutputsOptions = {},
+  ): Promise<string[]> {
+    const outputDir = path.resolve(
+      /* turbopackIgnore: true */ rootDir,
+      writeOptions.outputDir ?? "public",
+    );
+    const outputs = [
+      {
+        file: outputFilePath(outputDir, config.outputs.llms),
+        content: await getLlmsText(),
+      },
+      {
+        file: outputFilePath(outputDir, config.outputs.llmsFull),
+        content: await getLlmsFullText(),
+      },
+      {
+        file: outputFilePath(outputDir, config.outputs.searchIndex),
+        content: `${JSON.stringify(await getSearchIndex())}\n`,
+      },
+    ];
+
+    for (const output of outputs) {
+      await mkdir(path.dirname(output.file), { recursive: true });
+      await writeFile(output.file, output.content);
+    }
+
+    return outputs.map((output) => output.file);
   }
 
   return {
@@ -233,15 +269,19 @@ export function createDocs(
     getPages,
     getSearchIndex,
     navigation: config.navigation as NavigationSection[],
+    readPageSource,
     validate,
+    writeOutputs,
   };
 }
 
 export type DocsSource = ReturnType<typeof createDocs>;
 
 export {
+  cleanMdx,
   extractHeadings,
   slugifyHeading,
   stripMarkdown,
 } from "./markdown.js";
 export type { DocsHeading } from "./markdown.js";
+export type { SearchEntry } from "./search.js";

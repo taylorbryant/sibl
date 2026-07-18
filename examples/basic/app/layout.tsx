@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+import { DocsThemeScript } from "siglum/react";
 import "siglum/styles.css";
+import config from "@/siglum.config";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,8 +21,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       className={`${GeistSans.variable} ${GeistMono.variable}`}
       lang="en"
+      suppressHydrationWarning
     >
-      <body>{children}</body>
+      <body>
+        <DocsThemeScript storageKey={config.theme.storageKey} />
+        {children}
+      </body>
     </html>
   );
 }

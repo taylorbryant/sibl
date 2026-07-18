@@ -1,0 +1,71 @@
+Siglum enters an existing App Router project as an ordinary dependency.
+
+## Install the packages
+
+```bash
+bun add siglum @next/mdx @mdx-js/loader @mdx-js/react
+```
+
+Import the default stylesheet once from the root layout:
+
+```tsx
+import "siglum/styles.css";
+```
+
+## Configure MDX
+
+Keep the Next integration in `next.config.ts`:
+
+```ts
+import createMDX from "@next/mdx";
+import { createMdxOptions } from "siglum/mdx-config";
+
+const withMDX = createMDX({ options: createMdxOptions() });
+
+export default withMDX({
+  pageExtensions: ["ts", "tsx", "md", "mdx"],
+});
+```
+
+Add the standard `mdx-components.tsx` provider:
+
+```tsx
+import type { MDXComponents } from "mdx/types";
+import { createMdxComponents } from "siglum/mdx";
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return createMdxComponents(components);
+}
+```
+
+## Create the manifest
+
+Each page needs a slug and source path:
+
+```ts
+import { defineDocs } from "siglum";
+
+export default defineDocs({
+  title: "Acme",
+  description: "Build with the Acme API.",
+  navigation: [
+    {
+      label: "Start here",
+      items: [
+        { title: "Overview", slug: "", source: "content/docs/index.mdx" },
+      ],
+    },
+  ],
+});
+```
+
+## Connect the source
+
+```ts
+import { createDocs } from "siglum/server";
+import config from "./siglum.config";
+
+export const docs = createDocs(config, { rootDir: process.cwd() });
+```
+
+The example repository contains the complete catch-all route and explicit MDX registry. Nothing is generated into the application.

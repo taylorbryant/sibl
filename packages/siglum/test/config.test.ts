@@ -13,8 +13,12 @@ const input = {
     {
       label: "Guide",
       items: [
-        { title: "Introduction", slug: "" },
-        { title: "Install", slug: "install" },
+        { title: "Introduction", slug: "", source: "content/index.mdx" },
+        {
+          title: "Install",
+          slug: "install",
+          source: "content/install.mdx",
+        },
       ],
     },
   ],
@@ -25,11 +29,13 @@ describe("defineDocs", () => {
     const config = defineDocs(input);
 
     expect(config.basePath).toBe("/docs");
-    expect(config.contentDir).toBe("content/docs");
     expect(config.theme.mark).toBe("§");
+    expect(config.theme.accentDark).toBe("#9b91ff");
+    expect(config.outputs.searchIndex).toBe("/search-index.json");
+    expect(config.search.enabled).toBe(true);
   });
 
-  test("rejects duplicate routes", () => {
+  test("rejects duplicate routes and sources", () => {
     expect(() =>
       defineDocs({
         ...input,
@@ -37,19 +43,82 @@ describe("defineDocs", () => {
           ...input.navigation,
           {
             label: "Reference",
-            items: [{ title: "Duplicate", slug: "install" }],
+            items: [
+              {
+                title: "Duplicate",
+                slug: "install",
+                source: "content/duplicate.mdx",
+              },
+            ],
           },
         ],
       }),
     ).toThrow("Duplicate documentation slug");
+
+    expect(() =>
+      defineDocs({
+        ...input,
+        navigation: [
+          ...input.navigation,
+          {
+            label: "Reference",
+            items: [
+              {
+                title: "Duplicate",
+                slug: "duplicate",
+                source: "content/install.mdx",
+              },
+            ],
+          },
+        ],
+      }),
+    ).toThrow("Duplicate documentation source");
   });
 
-  test("rejects traversal in the content directory", () => {
-    expect(() => defineDocs({ ...input, contentDir: "../private" })).toThrow(
-      "contentDir must be a relative path",
-    );
+  test("rejects unsafe or non-MDX source files", () => {
+    expect(() =>
+      defineDocs({
+        ...input,
+        navigation: [
+          {
+            label: "Guide",
+            items: [
+              { title: "Private", slug: "", source: "../private.mdx" },
+            ],
+          },
+        ],
+      }),
+    ).toThrow("source must be a relative path");
+
+    expect(() =>
+      defineDocs({
+        ...input,
+        navigation: [
+          {
+            label: "Guide",
+            items: [
+              { title: "Text", slug: "", source: "content/index.txt" },
+            ],
+          },
+        ],
+      }),
+    ).toThrow("source must point to a .md or .mdx file");
+  });
+
+  test("keeps generated output paths inside the target directory", () => {
+    expect(() =>
+      defineDocs({
+        ...input,
+        outputs: {
+          llms: "/../llms.txt",
+          llmsFull: "/llms-full.txt",
+          searchIndex: "/search-index.json",
+        },
+      }),
+    ).toThrow("Output paths cannot traverse");
   });
 });
+
 describe("navigation", () => {
   test("flattens sections and builds links", () => {
     const config = defineDocs(input);

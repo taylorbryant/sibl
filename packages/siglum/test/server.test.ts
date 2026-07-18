@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { defineDocs } from "../src/config.js";
 import {
   SiglumContentError,
+  cleanMdx,
   createDocs,
   extractHeadings,
   stripMarkdown,
@@ -19,33 +20,39 @@ afterEach(async () => {
     ),
   );
 });
+
 async function fixture() {
   const rootDir = await mkdtemp(path.join(tmpdir(), "siglum-test-"));
   temporaryDirectories.push(rootDir);
-  const contentDir = path.join(rootDir, "docs");
+  const contentDir = path.join(rootDir, "content");
   await mkdir(contentDir, { recursive: true });
   await writeFile(
-    path.join(contentDir, "index.md"),
-    `---\ndescription: Start here.\n---\n\nWelcome to **Siglum**.\n\n## First section\n\nHello.\n`,
+    path.join(contentDir, "index.mdx"),
+    `import { Callout } from "siglum/react";\n\n# Welcome\n\nWelcome to **Siglum**.\n\n<Callout>One source.</Callout>\n\n## First section\n\nHello.\n`,
   );
   await writeFile(
-    path.join(contentDir, "install.md"),
-    `Install with \`bun add siglum\`.\n\n## Repeat\n\nOne.\n\n## Repeat\n\nTwo.\n`,
+    path.join(contentDir, "install.mdx"),
+    `# Installation\n\nInstall with \`bun add siglum\`.\n\n## Repeat\n\nOne.\n\n## Repeat\n\nTwo.\n`,
   );
 
   const config = defineDocs({
     title: "Example",
     description: "Example docs.",
-    contentDir: "docs",
     siteUrl: "https://example.com",
     navigation: [
       {
         label: "Guide",
         items: [
-          { title: "Introduction", slug: "" },
+          {
+            title: "Introduction",
+            slug: "",
+            source: "content/index.mdx",
+            description: "Start here.",
+          },
           {
             title: "Installation",
             slug: "install",
+            source: "content/install.mdx",
             description: "Install the package.",
           },
         ],
@@ -57,19 +64,22 @@ async function fixture() {
 }
 
 describe("createDocs", () => {
-  test("loads manifest pages and frontmatter", async () => {
+  test("returns manifest page descriptors without compiling content", async () => {
     const { docs } = await fixture();
-    const page = await docs.getPage([]);
+    const page = docs.getPage([]);
 
-    expect(page?.title).toBe("Introduction");
-    expect(page?.description).toBe("Start here.");
-    expect(page?.href).toBe("/docs");
-    expect(page?.headings).toEqual([
-      { depth: 2, id: "first-section", text: "First section" },
-    ]);
+    expect(page).toEqual({
+      title: "Introduction",
+      description: "Start here.",
+      href: "/docs",
+      section: "Guide",
+      segments: [],
+      slug: "",
+      source: "content/index.mdx",
+    });
   });
 
-  test("generates stable static params and reader outputs", async () => {
+  test("generates static params, agent text, and heading-level search", async () => {
     const { docs } = await fixture();
 
     expect(docs.generateStaticParams()).toEqual([
@@ -84,9 +94,38 @@ describe("createDocs", () => {
 
     const fullText = await docs.getLlmsFullText();
     expect(fullText).toContain("Install with `bun add siglum`");
+    expect(fullText).not.toContain("import { Callout }");
 
     const index = await docs.getSearchIndex();
-    expect(index[0]?.content).toBe("Welcome to Siglum. First section Hello.");
+    expect(index.map((entry) => entry.heading)).toEqual([
+      "Introduction",
+      "First section",
+      "Installation",
+      "Repeat",
+      "Repeat",
+    ]);
+    expect(index[1]).toMatchObject({
+      headingId: "first-section",
+      route: "/docs",
+      body: "Hello.",
+    });
+  });
+
+  test("writes static output files for export-oriented applications", async () => {
+    const { docs, rootDir } = await fixture();
+    const files = await docs.writeOutputs({ outputDir: "generated" });
+
+    expect(files).toHaveLength(3);
+    expect(await readFile(path.join(rootDir, "generated/llms.txt"), "utf8"))
+      .toContain("# Example");
+    expect(
+      JSON.parse(
+        await readFile(
+          path.join(rootDir, "generated/search-index.json"),
+          "utf8",
+        ),
+      ),
+    ).toHaveLength(5);
   });
 
   test("fails with an actionable missing-file error", async () => {
@@ -97,30 +136,36 @@ describe("createDocs", () => {
         ...config.navigation,
         {
           label: "Missing",
-          items: [{ title: "No file", slug: "missing" }],
+          items: [
+            {
+              title: "No file",
+              slug: "missing",
+              source: "content/missing.mdx",
+            },
+          ],
         },
       ],
     });
     const docs = createDocs(broken, { rootDir });
 
     await expect(docs.validate()).rejects.toBeInstanceOf(SiglumContentError);
-    await expect(docs.validate()).rejects.toThrow("docs/missing.md");
+    await expect(docs.validate()).rejects.toThrow("content/missing.mdx");
   });
 });
 
-describe("Markdown utilities", () => {
+describe("MDX utilities", () => {
   test("deduplicates heading identifiers and skips code fences", () => {
     expect(
       extractHeadings("## Hello\n## Hello\n```md\n## Not a heading\n```"),
     ).toEqual([
       { depth: 2, id: "hello", text: "Hello" },
-      { depth: 2, id: "hello-2", text: "Hello" },
+      { depth: 2, id: "hello-1", text: "Hello" },
     ]);
   });
 
-  test("creates compact plain text", () => {
-    expect(stripMarkdown("## Hello\n\nRead [the guide](/guide)."),).toBe(
-      "Hello Read the guide.",
-    );
+  test("removes module and component syntax from agent output", () => {
+    const source = `import { Callout } from "./callout";\n\n<Callout type="note">\nRead [the guide](/guide).\n</Callout>`;
+    expect(cleanMdx(source)).toBe("Read [the guide](/guide).");
+    expect(stripMarkdown(source)).toBe("Read the guide.");
   });
 });

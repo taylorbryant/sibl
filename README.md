@@ -1,86 +1,189 @@
 # Siglum
 
-Siglum is an experimental, Next-native documentation library for people and agents. It turns one explicit manifest and a directory of Markdown files into a documentation UI, a search index, `llms.txt`, and a full-text agent corpus.
+Siglum is a composable, Next-native documentation library extracted from the shared architecture of the Tenchi and Beignet documentation sites. Next.js compiles and routes the MDX; Siglum supplies the typed information architecture, documentation shell, MDX components, search, themes, and human- and agent-readable outputs.
 
-The package is intentionally small. Next.js continues to own routing, rendering, caching, and deployment; Siglum owns the documentation model and its default presentation.
+The package is intentionally a library rather than a framework. There is no wrapper around `next dev`, no generated application, and no private content runtime.
 
 ## Status
 
-This repository contains the initial working version. The package is not published yet and its API should be considered pre-release.
+This repository contains the `0.1.0` release candidate. It has not been published to npm yet.
 
-## Quick start
-
-Install the workspace and launch the included example:
+## Run the example
 
 ```bash
 bun install
 bun run dev
 ```
 
-Then open [http://localhost:3000/docs](http://localhost:3000/docs).
+Open [http://localhost:3000/docs](http://localhost:3000/docs).
 
-Define the documentation in `siglum.config.ts`:
+## Install
+
+```bash
+bun add siglum @next/mdx @mdx-js/loader @mdx-js/react
+```
+
+Import the visual system and pre-paint theme bootstrap once from your root layout:
+
+```tsx
+import { DocsThemeScript } from "siglum/react";
+import "siglum/styles.css";
+import config from "@/siglum.config";
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <DocsThemeScript storageKey={config.theme.storageKey} />
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+`suppressHydrationWarning` accounts for the theme class applied before React hydrates.
+
+## Configure MDX
+
+Siglum exposes serializable MDX options with GFM, stable heading IDs, and dual-theme Shiki highlighting. The Next integration stays visible in the application:
 
 ```ts
+// next.config.ts
+import createMDX from "@next/mdx";
+import type { NextConfig } from "next";
+import { createMdxOptions } from "siglum/mdx-config";
+
+const withMDX = createMDX({ options: createMdxOptions() });
+
+const nextConfig: NextConfig = {
+  pageExtensions: ["ts", "tsx", "md", "mdx"],
+};
+
+export default withMDX(nextConfig);
+```
+
+Connect Siglum's default MDX elements through Next's ordinary provider file:
+
+```tsx
+// mdx-components.tsx
+import type { MDXComponents } from "mdx/types";
+import { createMdxComponents } from "siglum/mdx";
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return createMdxComponents(components);
+}
+```
+
+Pass overrides to `createMdxComponents` to replace any HTML element or add application components.
+
+## Define the documentation
+
+Every public page maps to an explicit source file. The manifest controls navigation and metadata without taking content compilation away from Next.js.
+
+```ts
+// siglum.config.ts
 import { defineDocs } from "siglum";
 
 export default defineDocs({
   title: "Acme",
   description: "Documentation for the Acme SDK.",
+  basePath: "/docs",
+  siteUrl: "https://docs.example.com",
   navigation: [
     {
       label: "Guide",
       items: [
-        { title: "Introduction", slug: "" },
-        { title: "Installation", slug: "installation" },
+        {
+          title: "Introduction",
+          slug: "",
+          source: "content/docs/index.mdx",
+        },
+        {
+          title: "Installation",
+          slug: "installation",
+          source: "content/docs/installation.mdx",
+        },
       ],
     },
   ],
 });
 ```
 
-Connect it to the content directory:
+Create the server-side documentation model:
 
 ```ts
+// lib/docs.ts
 import { createDocs } from "siglum/server";
-import config from "./siglum.config";
+import config from "@/siglum.config";
 
 export const docs = createDocs(config, { rootDir: process.cwd() });
 ```
 
-Render a page from an ordinary App Router route:
+## Render compiled MDX
+
+MDX imports remain static and inspectable. A catch-all route can use a small content registry:
+
+```ts
+// lib/content.ts
+import Introduction from "@/content/docs/index.mdx";
+import Installation from "@/content/docs/installation.mdx";
+
+export const content = {
+  "": Introduction,
+  installation: Installation,
+};
+```
 
 ```tsx
+// app/docs/[[...slug]]/page.tsx
 import { notFound } from "next/navigation";
-import { DocsPageView } from "siglum/react";
+import { DocsPage } from "siglum/react";
+import { content } from "@/lib/content";
 import { docs } from "@/lib/docs";
 
-export default async function Page({ params }) {
-  const { slug } = await params;
-  const page = await docs.getPage(slug);
+export function generateStaticParams() {
+  return docs.generateStaticParams();
+}
 
+export default async function Page({ params }) {
+  const page = docs.getPage((await params).slug);
   if (!page) notFound();
-  return <DocsPageView config={docs.config} page={page} />;
+
+  const Content = content[page.slug];
+  if (!Content) notFound();
+
+  return (
+    <DocsPage config={docs.config} page={page}>
+      <Content />
+    </DocsPage>
+  );
 }
 ```
 
-The complete integration, including static params, metadata, sitemap, and agent routes, lives in [`examples/basic`](./examples/basic).
+`DocsPage` is only a convenience composition. Applications can independently use `DocsLayout`, `DocsArticle`, `DocsPageHeader`, `DocsPagination`, `DocsNavigation`, and `DocsTableOfContents`. The layout accepts custom brand, header action, sidebar footer, and footer slots.
 
-Set `siteUrl` in the manifest before deploying so `llms.txt` and sitemap entries use the production origin.
+## Outputs
 
-## Public API
+The server model exposes:
 
-- `siglum` — typed configuration and navigation helpers
-- `siglum/server` — Markdown loading and generated outputs
-- `siglum/react` — the default Server Component-compatible documentation page
-- `siglum/styles.css` — the default visual system
-
-## Repository layout
-
-```text
-packages/siglum   Library source and tests
-examples/basic    Runnable Next.js App Router example
+```ts
+await docs.getSearchIndex();
+await docs.getLlmsText();
+await docs.getLlmsFullText();
+await docs.writeOutputs({ outputDir: "public" });
 ```
+
+Use route handlers when the Next deployment can generate them, or `writeOutputs` before a static export. Search entries are generated for individual second- and third-level headings, not only whole pages.
+
+## Package exports
+
+- `siglum` — configuration, navigation, and search primitives
+- `siglum/server` — source validation and generated outputs
+- `siglum/react` — composable documentation UI
+- `siglum/mdx` — default MDX components and `Callout`
+- `siglum/mdx-config` — serializable Next MDX compiler options
+- `siglum/styles.css` — default responsive light/dark visual system
 
 ## Development
 

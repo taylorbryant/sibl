@@ -1,10 +1,14 @@
+import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
+import { createMdxOptions } from "siglum/mdx-config";
+
+const withMDX = createMDX({
+  options: createMdxOptions(),
+});
 
 const nextConfig: NextConfig = {
-  outputFileTracingIncludes: {
-    "/*": ["./content/docs/**/*.md"],
-  },
+  pageExtensions: ["ts", "tsx", "md", "mdx"],
   serverExternalPackages: ["siglum"],
 };
 
-export default nextConfig;
+export default withMDX(nextConfig);

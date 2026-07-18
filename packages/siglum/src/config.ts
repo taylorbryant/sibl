@@ -2,6 +2,23 @@ import { z } from "zod";
 
 const slugPattern = /^(?:[a-z0-9]+(?:-[a-z0-9]+)*)(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$|^$/;
 const hexColorPattern = /^#[0-9a-f]{6}$/i;
+const routePathPattern = /^\/[a-z0-9./_-]+$/;
+
+const safeRelativePath = z
+  .string()
+  .trim()
+  .min(1)
+  .refine(
+    (value) =>
+      !value.startsWith("/") &&
+      !value.startsWith("~") &&
+      !value.split(/[\\/]/).includes(".."),
+    "source must be a relative path inside the project",
+  )
+  .refine(
+    (value) => /\.mdx?$/.test(value),
+    "source must point to a .md or .mdx file",
+  );
 
 const navigationItemSchema = z
   .object({
@@ -9,7 +26,10 @@ const navigationItemSchema = z
     slug: z.string().regex(slugPattern, {
       message: "Use lowercase URL segments separated by slashes",
     }),
+    source: safeRelativePath,
     description: z.string().trim().min(1).optional(),
+    eyebrow: z.string().trim().min(1).optional(),
+    navLabel: z.string().trim().min(1).optional(),
     badge: z.string().trim().min(1).optional(),
   })
   .strict();
@@ -28,6 +48,16 @@ const linkSchema = z
   })
   .strict();
 
+const outputPath = z
+  .string()
+  .regex(routePathPattern, {
+    message: "Output paths must be absolute URL paths",
+  })
+  .refine(
+    (value) => !value.split("/").includes(".."),
+    "Output paths cannot traverse outside the output directory",
+  );
+
 export const docsConfigSchema = z
   .object({
     title: z.string().trim().min(1),
@@ -42,43 +72,72 @@ export const docsConfigSchema = z
         return value.replace(/\/+$/, "");
       })
       .default("/docs"),
-    contentDir: z
-      .string()
-      .trim()
-      .min(1)
-      .refine(
-        (value) =>
-          !value.startsWith("/") &&
-          !value.startsWith("~") &&
-          !value.split(/[\\/]/).includes(".."),
-        "contentDir must be a relative path inside the project",
-      )
-      .default("content/docs"),
     siteUrl: z.string().url().optional(),
     navigation: z.array(navigationSectionSchema).min(1),
     links: z.array(linkSchema).default([]),
+    outputs: z
+      .object({
+        llms: outputPath.default("/llms.txt"),
+        llmsFull: outputPath.default("/llms-full.txt"),
+        searchIndex: outputPath.default("/search-index.json"),
+      })
+      .strict()
+      .default({
+        llms: "/llms.txt",
+        llmsFull: "/llms-full.txt",
+        searchIndex: "/search-index.json",
+      }),
+    search: z
+      .object({
+        enabled: z.boolean().default(true),
+        placeholder: z.string().trim().min(1).default("Search documentation…"),
+      })
+      .strict()
+      .default({ enabled: true, placeholder: "Search documentation…" }),
     theme: z
       .object({
         accent: z.string().regex(hexColorPattern).default("#6658d3"),
+        accentDark: z.string().regex(hexColorPattern).default("#9b91ff"),
         mark: z.string().trim().min(1).max(3).default("§"),
+        storageKey: z
+          .string()
+          .trim()
+          .regex(/^[a-zA-Z0-9._:-]+$/, {
+            message: "theme.storageKey may only contain letters, numbers, ., _, :, and -",
+          })
+          .default("siglum-theme"),
       })
       .strict()
-      .default({ accent: "#6658d3", mark: "§" }),
+      .default({
+        accent: "#6658d3",
+        accentDark: "#9b91ff",
+        mark: "§",
+        storageKey: "siglum-theme",
+      }),
   })
   .strict()
   .superRefine((config, context) => {
-    const seen = new Set<string>();
+    const slugs = new Set<string>();
+    const sources = new Set<string>();
 
     for (const section of config.navigation) {
       for (const item of section.items) {
-        if (seen.has(item.slug)) {
+        if (slugs.has(item.slug)) {
           context.addIssue({
             code: "custom",
             message: `Duplicate documentation slug: ${item.slug || "<root>"}`,
             path: ["navigation"],
           });
         }
-        seen.add(item.slug);
+        if (sources.has(item.source)) {
+          context.addIssue({
+            code: "custom",
+            message: `Duplicate documentation source: ${item.source}`,
+            path: ["navigation"],
+          });
+        }
+        slugs.add(item.slug);
+        sources.add(item.source);
       }
     }
   });

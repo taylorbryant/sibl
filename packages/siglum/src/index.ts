@@ -14,3 +14,10 @@ export {
   pageHref,
   type FlatNavigationItem,
 } from "./navigation.js";
+export {
+  makeSearchSnippet,
+  searchDocs,
+  tokenizeSearch,
+  type SearchEntry,
+  type SearchResult,
+} from "./search.js";

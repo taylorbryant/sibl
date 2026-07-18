@@ -1,0 +1,46 @@
+Siglum treats agent-readable documentation and search as build products of the same MDX sources—not secondary bodies of content to maintain.
+
+## llms.txt
+
+`docs.getLlmsText()` produces a compact map of the corpus. It preserves manifest ordering, summaries, and canonical links.
+
+```ts
+export async function GET() {
+  return new Response(await docs.getLlmsText(), {
+    headers: { "content-type": "text/plain; charset=utf-8" },
+  });
+}
+```
+
+This example publishes it at [`/llms.txt`](/llms.txt).
+
+## Full-text context
+
+`docs.getLlmsFullText()` removes imports and component markup while preserving prose and fenced code. The example exposes the result at [`/llms-full.txt`](/llms-full.txt).
+
+## Search index
+
+`docs.getSearchIndex()` emits an entry for each page introduction and every second- or third-level heading. This makes a focused subsection rank above an unrelated whole page.
+
+```json
+{
+  "route": "/docs/configuration",
+  "pageTitle": "Configuration",
+  "sectionLabel": "Reference",
+  "heading": "Composition settings",
+  "headingId": "composition-settings",
+  "body": "UI customization is passed as React props..."
+}
+```
+
+The example publishes the array at [`/search-index.json`](/search-index.json), and the default search dialog loads it on first use.
+
+## Static-export workflow
+
+Applications that need physical files can generate all three outputs before `next build`:
+
+```ts
+await docs.writeOutputs({ outputDir: "public" });
+```
+
+Every representation uses the same routes, titles, descriptions, and sources, so human and agent documentation cannot quietly drift apart.

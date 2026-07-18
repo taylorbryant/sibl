@@ -1,0 +1,37 @@
+Siglum separates the documentation problem into three layers. Applications can adopt the complete default or compose the individual pieces themselves.
+
+## The typed manifest
+
+`defineDocs` validates project metadata, navigation, slugs, source files, output paths, links, search settings, and theme tokens. Duplicate routes or sources fail immediately.
+
+The manifest is deliberately more explicit than filesystem-derived navigation. Moving an MDX file should not silently reorganize a public information architecture.
+
+## Next-compiled MDX
+
+Next.js imports and compiles every MDX module. Siglum never evaluates MDX source at request time. A small content registry connects the manifest slug to the statically imported component:
+
+```ts
+import Overview from "@/content/docs/index.mdx";
+import Installation from "@/content/docs/installation.mdx";
+
+export const content = {
+  "": Overview,
+  installation: Installation,
+};
+```
+
+Siglum reads the raw source only when validating content or producing search and agent outputs.
+
+## The composable React surface
+
+`DocsPage` combines the default pieces for the common case. The same page can be assembled directly from `DocsLayout`, `DocsArticle`, `DocsPageHeader`, and `DocsPagination`.
+
+The shell accepts application-owned branding, header actions, sidebar metadata, and footer content. `createMdxComponents` also accepts overrides for every rendered element.
+
+## Small client islands
+
+The layout remains a Server Component. JavaScript is limited to behavior that needs the browser: keyboard search, theme persistence, table-of-contents tracking, and code copying.
+
+## The framework boundary
+
+Siglum does not wrap `next dev`, hide routes, generate an application, or invent a deployment pipeline. This is an architectural constraint, not a missing feature.
