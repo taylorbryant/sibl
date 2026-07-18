@@ -1,0 +1,7 @@
+html,
+body {
+  min-height: 100%;
+}
+::selection {
+  background: color-mix(in srgb, #6658d3 22%, transparent);
+}
