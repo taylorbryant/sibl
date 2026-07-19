@@ -416,7 +416,6 @@ body:has(> .sibl-root) {
   font-weight: 400;
   opacity: 0;
   text-decoration: none;
-  vertical-align: -0.08em;
   transition:
     color 150ms ease,
     opacity 150ms ease;
