@@ -1,4 +1,5 @@
 import { defineDocs } from "@sibl/docs";
+import docsPackage from "../../packages/docs/package.json";
 
 export default defineDocs({
   title: "Sibl",
@@ -7,6 +8,7 @@ export default defineDocs({
   docsPath: "/docs",
   appBasePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+  version: docsPackage.version,
   navigation: [
     {
       label: "Getting started",
@@ -67,8 +69,8 @@ export default defineDocs({
     },
   ],
   links: [
-    { label: "GitHub", href: "https://github.com/taylorbryant/sibl" },
-    { label: "npm", href: "https://www.npmjs.com/package/@sibl/docs" },
+    { type: "github", href: "https://github.com/taylorbryant/sibl" },
+    { type: "npm", href: "https://www.npmjs.com/package/@sibl/docs" },
   ],
   theme: {
     accent: { light: "#4f46e5", dark: "#bd93f9" },

@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import type { DocsConfig, NavigationSection } from "./config.js";
 import { pageHref, publicHref } from "./navigation.js";
+import { DocsProjectMeta } from "./project-meta.js";
 import { SearchButton } from "./search-ui.js";
 import { ThemeToggle } from "./theme.js";
 import { DocsTableOfContents } from "./toc.js";
@@ -79,24 +80,6 @@ export function DocsNavigation({
   );
 }
 
-function DefaultProjectLinks({ config }: { config: DocsConfig }) {
-  if (config.links.length === 0) return null;
-  return (
-    <div className="sibl-sidebar-links">
-      {config.links.map((link) => (
-        <a
-          href={link.href}
-          key={link.href}
-          rel={link.href.startsWith("http") ? "noreferrer" : undefined}
-          target={link.href.startsWith("http") ? "_blank" : undefined}
-        >
-          {link.label}
-        </a>
-      ))}
-    </div>
-  );
-}
-
 function SidebarMeta({
   config,
   content,
@@ -109,7 +92,7 @@ function SidebarMeta({
   return (
     <div className="sibl-sidebar-meta">
       <div className="sibl-sidebar-meta-content">
-        {content ?? <DefaultProjectLinks config={config} />}
+        {content ?? <DocsProjectMeta config={config} />}
       </div>
       {showThemeToggle ? <ThemeToggle theme={config.theme} /> : null}
     </div>

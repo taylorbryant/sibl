@@ -88,6 +88,39 @@ describe("documentation shell", () => {
     expect(markup).not.toContain("<span>Example</span>");
   });
 
+  test("renders typed project links and version metadata", () => {
+    const projectConfig = defineDocs({
+      ...config,
+      version: "0.10.0",
+      links: [
+        { type: "github", href: "https://github.com/example/docs" },
+        { type: "npm", href: "https://www.npmjs.com/package/example" },
+        {
+          type: "pypi",
+          href: "https://pypi.org/project/example",
+          label: "Example Python package",
+        },
+        {
+          type: "external",
+          href: "https://status.example.com",
+          label: "Status",
+        },
+      ],
+    });
+    const markup = renderToStaticMarkup(
+      <DocsPage config={projectConfig} page={page} {...behaviorProps}>
+        <h1>Overview</h1>
+      </DocsPage>,
+    );
+
+    expect(markup).toContain('aria-label="Example on GitHub"');
+    expect(markup).toContain('aria-label="Example on npm"');
+    expect(markup).toContain('aria-label="Example Python package"');
+    expect(markup).toContain('data-type="external"');
+    expect(markup).toContain(">Status</a>");
+    expect(markup).toContain('class="sibl-project-version">v0.10.0</span>');
+  });
+
   test("bootstraps the browser chrome color with the stored theme", () => {
     const markup = renderToStaticMarkup(
       <DocsThemeScript

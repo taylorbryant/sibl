@@ -45,7 +45,11 @@ describe("defineDocs", () => {
 
   test("does not share mutable defaults between configs", () => {
     const first = defineDocs(input);
-    first.links.push({ href: "/changed", label: "Changed" });
+    first.links.push({
+      type: "external",
+      href: "/changed",
+      label: "Changed",
+    });
     first.outputs.llms = "/changed.txt";
     first.search.enabled = false;
     first.theme.accent.light = "#000000";
@@ -62,6 +66,45 @@ describe("defineDocs", () => {
     partialFirst.theme.accent.dark = "#000000";
     const partialSecond = defineDocs({ ...input, theme: {} });
     expect(partialSecond.theme.accent.dark).toBe("#bd93f9");
+  });
+
+  test("validates typed project links and version metadata", () => {
+    const config = defineDocs({
+      ...input,
+      version: "0.10.0",
+      links: [
+        { type: "github", href: "https://github.com/example/docs" },
+        {
+          type: "pypi",
+          href: "https://pypi.org/project/example",
+          label: "Example package on PyPI",
+        },
+        {
+          type: "external",
+          href: "https://status.example.com",
+          label: "Status",
+        },
+      ],
+    });
+
+    expect(config.version).toBe("0.10.0");
+    expect(config.links.map((link) => link.type)).toEqual([
+      "github",
+      "pypi",
+      "external",
+    ]);
+    expect(
+      docsConfigSchema.safeParse({
+        ...input,
+        links: [{ href: "https://example.com", label: "Legacy link" }],
+      }).success,
+    ).toBe(false);
+    expect(
+      docsConfigSchema.safeParse({
+        ...input,
+        links: [{ type: "external", href: "https://example.com" }],
+      }).success,
+    ).toBe(false);
   });
 
   test("rejects duplicate routes and sources", () => {

@@ -92,12 +92,33 @@ const navigationSectionSchema = z
   })
   .strict();
 
-const linkSchema = z
-  .object({
-    label: z.string().trim().min(1),
-    href: z.string().trim().min(1),
-  })
-  .strict();
+const linkHref = z.string().trim().min(1);
+const linkLabel = z.string().trim().min(1);
+
+function brandedLinkSchema<const Type extends "github" | "npm" | "pypi">(
+  type: Type,
+) {
+  return z
+    .object({
+      type: z.literal(type),
+      href: linkHref,
+      label: linkLabel.optional(),
+    })
+    .strict();
+}
+
+const linkSchema = z.discriminatedUnion("type", [
+  brandedLinkSchema("github"),
+  brandedLinkSchema("npm"),
+  brandedLinkSchema("pypi"),
+  z
+    .object({
+      type: z.literal("external"),
+      href: linkHref,
+      label: linkLabel,
+    })
+    .strict(),
+]);
 
 const outputPath = z
   .string()
@@ -116,6 +137,7 @@ export const docsConfigSchema = z
     docsPath: docsPath.default("/docs"),
     appBasePath: appBasePath.default(""),
     siteUrl: z.string().url().optional(),
+    version: z.string().trim().min(1).optional(),
     navigation: z.array(navigationSectionSchema).min(1),
     links: z.array(linkSchema).default(() => []),
     outputs: z
@@ -175,6 +197,7 @@ export const docsConfigSchema = z
 
 export type NavigationItem = z.infer<typeof navigationItemSchema>;
 export type NavigationSection = z.infer<typeof navigationSectionSchema>;
+export type DocsLink = z.infer<typeof linkSchema>;
 export type DocsConfig = z.output<typeof docsConfigSchema>;
 export type DocsConfigInput = z.input<typeof docsConfigSchema>;
 export type DocsTheme = DocsConfig["theme"];

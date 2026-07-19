@@ -1,6 +1,7 @@
 export {
   type DocsConfig,
   type DocsConfigInput,
+  type DocsLink,
   type DocsTheme,
   defineDocs,
   docsConfigSchema,

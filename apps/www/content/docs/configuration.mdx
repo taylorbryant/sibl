@@ -11,7 +11,8 @@ The config is both a runtime-validated object and the source of the public navig
 | `docsPath` | `/docs` | Route prefix for documentation |
 | `appBasePath` | `""` | Optional path where the entire Next application is deployed |
 | `siteUrl` | — | Optional origin for canonical agent links |
-| `links` | `[]` | Project links shown beside the sidebar controls |
+| `version` | — | Optional project version shown in the sidebar |
+| `links` | `[]` | Typed project links shown beside the sidebar controls |
 | `outputs` | standard paths | Locations for search and agent outputs |
 | `search` | enabled | Search visibility and placeholder |
 | `theme` | Sibl defaults | Light/dark backgrounds and accents, plus the storage key |
@@ -38,6 +39,27 @@ Each section has a label and one or more page entries. A page entry maps its pub
 ```
 
 Slugs use lowercase URL segments such as `guides/deployment`. The root page uses an empty slug. Source paths must stay inside the application root.
+
+## Project metadata
+
+Sibl can render common project destinations and a version badge beside the theme control. Applications own the values, so builds stay local and deterministic:
+
+```ts
+import packageJson from "./package.json";
+
+export default defineDocs({
+  // ...
+  version: packageJson.version,
+  links: [
+    { type: "github", href: "https://github.com/acme/project" },
+    { type: "npm", href: "https://www.npmjs.com/package/@acme/project" },
+  ],
+});
+```
+
+Built-in link types are `github`, `npm`, and `pypi`. Sibl supplies their compact marks and an accessible label derived from the project title. Pass `label` to override that accessible name. Use `{ type: "external", href, label }` for another destination; its label is displayed as text.
+
+Sibl does not fetch registry metadata or infer versions from URLs. A JavaScript project can read `package.json`, while a Python project can read its local `pyproject.toml` before calling `defineDocs`.
 
 ## Deployment paths
 
@@ -107,7 +129,7 @@ UI customization is passed as React props rather than stored in the serializable
   page={page}
   brand={<ProductLogo />}
   headerActions={<StatusLink />}
-  sidebarFooter={<Version />}
+  sidebarFooter={<CustomSidebarFooter />}
   footer={<LegalLinks />}
 >
   <Content />
