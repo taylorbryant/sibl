@@ -1,9 +1,11 @@
+import type { Viewport } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { DocsConfig } from "./config.js";
+import type { DocsConfig, DocsTheme } from "./config.js";
 import { adjacentNavigationItems, pageHref } from "./navigation.js";
-import type { DocsPage as DocsPageData } from "./server.js";
+import type { DocsPageDescriptor } from "./server.js";
 import { DocsLayout, type DocsLayoutProps } from "./shell.js";
+import type { DocsThemeSettings } from "./theme.js";
 
 function classNames(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
@@ -17,16 +19,30 @@ function serializeInlineScriptValue(value: string): string {
 }
 
 export interface DocsThemeScriptProps {
-  darkColor?: string;
-  lightColor?: string;
-  storageKey: string;
+  theme: DocsThemeSettings;
 }
 
-export function DocsThemeScript({
-  darkColor = "#282a36",
-  lightColor = "#ffffff",
-  storageKey,
-}: DocsThemeScriptProps) {
+export function createDocsViewport(
+  theme: Pick<DocsTheme, "background">,
+): Viewport {
+  return {
+    themeColor: [
+      {
+        color: theme.background.light,
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        color: theme.background.dark,
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+  };
+}
+
+export function DocsThemeScript({ theme }: DocsThemeScriptProps) {
+  const darkColor = theme.background.dark;
+  const lightColor = theme.background.light;
+  const storageKey = theme.storageKey;
   const serializedStorageKey = serializeInlineScriptValue(storageKey);
   const serializedDarkColor = serializeInlineScriptValue(darkColor);
   const serializedLightColor = serializeInlineScriptValue(lightColor);
@@ -48,7 +64,11 @@ export function DocsArticle({ children, className }: DocsArticleProps) {
   );
 }
 
-export function DocsPageHeader({ page }: { page: DocsPageData }) {
+export interface DocsPageHeaderProps {
+  page: DocsPageDescriptor;
+}
+
+export function DocsPageHeader({ page }: DocsPageHeaderProps) {
   return (
     <header className="sibl-page-header">
       {(page.eyebrow ?? page.section) ? (
@@ -96,7 +116,7 @@ export function DocsPagination({ config, currentSlug }: DocsPaginationProps) {
 export interface DocsPageProps
   extends Omit<DocsLayoutProps, "children" | "currentSlug"> {
   children: ReactNode;
-  page: DocsPageData;
+  page: DocsPageDescriptor;
 }
 
 export function DocsPage({ children, page, ...layoutProps }: DocsPageProps) {
@@ -135,10 +155,14 @@ export {
   type DocsNavigationProps,
 } from "./shell.js";
 export {
+  type DocsThemeSettings,
   type Theme,
   type ThemeColors,
   ThemeToggle,
   type ThemeToggleProps,
   useDocsTheme,
 } from "./theme.js";
-export { DocsTableOfContents } from "./toc.js";
+export {
+  DocsTableOfContents,
+  type DocsTableOfContentsProps,
+} from "./toc.js";

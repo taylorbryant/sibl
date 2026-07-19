@@ -1,6 +1,7 @@
 export {
   type DocsConfig,
   type DocsConfigInput,
+  type DocsTheme,
   defineDocs,
   docsConfigSchema,
   type NavigationItem,

@@ -2,20 +2,14 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
+import type { DocsTheme } from "./config.js";
 
 export type Theme = "light" | "dark" | "system";
 
-export interface ThemeColors {
-  dark: string;
-  light: string;
-}
+export type ThemeColors = DocsTheme["background"];
+export type DocsThemeSettings = Pick<DocsTheme, "background" | "storageKey">;
 
 const darkQuery = "(prefers-color-scheme: dark)";
-const defaultThemeColors: ThemeColors = {
-  dark: "#282a36",
-  light: "#ffffff",
-};
-
 function readTheme(storageKey: string): Theme {
   try {
     const value = localStorage.getItem(storageKey);
@@ -49,10 +43,12 @@ function applyTheme(theme: Theme, colors: ThemeColors): void {
   updateBrowserThemeColor(dark ? colors.dark : colors.light);
 }
 
-export function useDocsTheme(
-  storageKey: string,
-  colors: ThemeColors = defaultThemeColors,
-) {
+export function useDocsTheme(settings: DocsThemeSettings): {
+  setTheme: (theme: Theme) => void;
+  theme: Theme;
+} {
+  const colors = settings.background;
+  const storageKey = settings.storageKey;
   const darkColor = colors.dark;
   const lightColor = colors.light;
   const [theme, setThemeState] = useState<Theme>("system");
@@ -156,18 +152,11 @@ const themeOptions: Array<{ icon: ReactNode; label: string; value: Theme }> = [
 ];
 
 export interface ThemeToggleProps {
-  darkColor?: string;
-  lightColor?: string;
-  storageKey: string;
+  theme: DocsThemeSettings;
 }
 
-export function ThemeToggle({
-  darkColor = defaultThemeColors.dark,
-  lightColor = defaultThemeColors.light,
-  storageKey,
-}: ThemeToggleProps) {
-  const colors = { dark: darkColor, light: lightColor };
-  const { setTheme, theme } = useDocsTheme(storageKey, colors);
+export function ThemeToggle({ theme: settings }: ThemeToggleProps) {
+  const { setTheme, theme } = useDocsTheme(settings);
 
   return (
     <fieldset className="sibl-theme-toggle" aria-label="Theme">

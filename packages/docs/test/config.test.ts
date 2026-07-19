@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { defineDocs } from "../src/config.js";
+import { defineDocs, docsConfigSchema } from "../src/config.js";
 import {
   adjacentNavigationItems,
   flattenNavigation,
@@ -29,15 +29,40 @@ describe("defineDocs", () => {
   test("applies stable defaults", () => {
     const config = defineDocs(input);
 
-    expect(config.basePath).toBe("/docs");
-    expect(config.deploymentBasePath).toBe("");
+    expect(config.docsPath).toBe("/docs");
+    expect(config.appBasePath).toBe("");
     expect(config.theme.mark).toBe("§");
-    expect(config.theme.accent).toBe("#4f46e5");
-    expect(config.theme.accentDark).toBe("#bd93f9");
-    expect(config.theme.background).toBe("#ffffff");
-    expect(config.theme.backgroundDark).toBe("#282a36");
+    expect(config.theme.accent).toEqual({
+      light: "#4f46e5",
+      dark: "#bd93f9",
+    });
+    expect(config.theme.background).toEqual({
+      light: "#ffffff",
+      dark: "#282a36",
+    });
     expect(config.outputs.searchIndex).toBe("/search-index.json");
     expect(config.search.enabled).toBe(true);
+  });
+
+  test("does not share mutable defaults between configs", () => {
+    const first = defineDocs(input);
+    first.links.push({ href: "/changed", label: "Changed" });
+    first.outputs.llms = "/changed.txt";
+    first.search.enabled = false;
+    first.theme.accent.light = "#000000";
+    first.theme.background.dark = "#000000";
+
+    const second = defineDocs(input);
+    expect(second.links).toEqual([]);
+    expect(second.outputs.llms).toBe("/llms.txt");
+    expect(second.search.enabled).toBe(true);
+    expect(second.theme.accent.light).toBe("#4f46e5");
+    expect(second.theme.background.dark).toBe("#282a36");
+
+    const partialFirst = defineDocs({ ...input, theme: {} });
+    partialFirst.theme.accent.dark = "#000000";
+    const partialSecond = defineDocs({ ...input, theme: {} });
+    expect(partialSecond.theme.accent.dark).toBe("#bd93f9");
   });
 
   test("rejects duplicate routes and sources", () => {
@@ -119,16 +144,31 @@ describe("defineDocs", () => {
     ).toThrow("Output paths cannot traverse");
   });
 
-  test("normalizes deployment base paths", () => {
-    const config = defineDocs({ ...input, deploymentBasePath: "/project/" });
+  test("normalizes application base paths", () => {
+    const config = defineDocs({ ...input, appBasePath: "/project/" });
 
-    expect(config.deploymentBasePath).toBe("/project");
+    expect(config.appBasePath).toBe("/project");
     expect(publicHref(config, "/search-index.json")).toBe(
       "/project/search-index.json",
     );
     expect(publicHref(config, "https://example.com/file.json")).toBe(
       "https://example.com/file.json",
     );
+  });
+
+  test("rejects removed path fields and flat theme colors", () => {
+    expect(
+      docsConfigSchema.safeParse({ ...input, basePath: "/guide" }).success,
+    ).toBe(false);
+    expect(
+      docsConfigSchema.safeParse({
+        ...input,
+        theme: {
+          accent: "#112233",
+          background: "#fefefe",
+        },
+      }).success,
+    ).toBe(false);
   });
 });
 

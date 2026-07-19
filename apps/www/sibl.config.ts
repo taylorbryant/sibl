@@ -4,8 +4,8 @@ export default defineDocs({
   title: "Sibl",
   description:
     "Explicit, Next-native documentation primitives for people and agents.",
-  basePath: "/docs",
-  deploymentBasePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",
+  docsPath: "/docs",
+  appBasePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
   navigation: [
     {
@@ -71,10 +71,8 @@ export default defineDocs({
     { label: "npm", href: "https://www.npmjs.com/package/@sibl/docs" },
   ],
   theme: {
-    accent: "#4f46e5",
-    accentDark: "#bd93f9",
-    background: "#ffffff",
-    backgroundDark: "#282a36",
+    accent: { light: "#4f46e5", dark: "#bd93f9" },
+    background: { light: "#ffffff", dark: "#282a36" },
     mark: "§",
     storageKey: "sibl-docs-theme",
   },

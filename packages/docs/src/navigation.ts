@@ -22,19 +22,20 @@ export function normalizeSlug(slug: string | string[] | undefined): string {
 
 export function pageHref(config: DocsConfig, slug: string): string {
   const normalized = normalizeSlug(slug);
-  if (!normalized) return config.basePath;
-  if (config.basePath === "/") return `/${normalized}`;
-  return `${config.basePath}/${normalized}`;
+  if (!normalized) return config.docsPath;
+  if (config.docsPath === "/") return `/${normalized}`;
+  return `${config.docsPath}/${normalized}`;
 }
 
 /** Prefixes a root-relative public asset or URL with the deployment path. */
 export function publicHref(
-  config: Pick<DocsConfig, "deploymentBasePath">,
+  config: Pick<DocsConfig, "appBasePath">,
   href: string,
 ): string {
-  if (!config.deploymentBasePath || !href.startsWith("/")) return href;
-  if (href === "/") return config.deploymentBasePath;
-  return `${config.deploymentBasePath}${href}`;
+  const basePath = config.appBasePath;
+  if (!basePath || !href.startsWith("/")) return href;
+  if (href === "/") return basePath;
+  return `${basePath}${href}`;
 }
 
 export function findNavigationItem(

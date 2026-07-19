@@ -68,9 +68,9 @@ export default defineDocs({
 import { createDocs } from "@sibl/docs/server";
 import config from "./sibl.config";
 
-export const docs = createDocs(config, { rootDir: process.cwd() });
+export const docs = createDocs(config);
 ```
 
 Sibl's own documentation app contains the complete catch-all route and explicit MDX registry. Nothing is generated into the application.
 
-Wrap that registry with `defineDocsContent(docs, content)` and call `await docs.validate()` from `generateStaticParams`. The production build will then fail if navigation, static MDX imports, source files, or internal links drift apart.
+Wrap that registry with `docs.defineContent(content)` and call `await docs.validate()` from `generateStaticParams`. The production build will then fail if navigation, static MDX imports, source files, or internal links drift apart.

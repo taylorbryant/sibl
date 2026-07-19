@@ -26,7 +26,7 @@ links in the sitemap and agent-readable outputs.
 
 If the application is deployed below an origin path, set
 `NEXT_PUBLIC_BASE_PATH` (for example, `/preview`) as well. The canonical app
-passes the same value to Next.js `basePath` and Sibl `deploymentBasePath`.
+passes the same value to Next.js `basePath` and Sibl `appBasePath`.
 
 To exercise the same integration as a prefixed static export, run:
 
@@ -43,32 +43,17 @@ bun add @sibl/docs @next/mdx @mdx-js/loader @mdx-js/react
 Import the visual system and pre-paint theme bootstrap once from your root layout:
 
 ```tsx
-import { DocsThemeScript } from "@sibl/docs/react";
+import { createDocsViewport, DocsThemeScript } from "@sibl/docs/react";
 import "@sibl/docs/styles.css";
 import config from "@/sibl.config";
 
-export const viewport = {
-  themeColor: [
-    {
-      color: config.theme.background,
-      media: "(prefers-color-scheme: light)",
-    },
-    {
-      color: config.theme.backgroundDark,
-      media: "(prefers-color-scheme: dark)",
-    },
-  ],
-};
+export const viewport = createDocsViewport(config.theme);
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <DocsThemeScript
-          darkColor={config.theme.backgroundDark}
-          lightColor={config.theme.background}
-          storageKey={config.theme.storageKey}
-        />
+        <DocsThemeScript theme={config.theme} />
         {children}
       </body>
     </html>
@@ -136,8 +121,8 @@ import { defineDocs } from "@sibl/docs";
 export default defineDocs({
   title: "Acme",
   description: "Documentation for the Acme SDK.",
-  basePath: "/docs",
-  deploymentBasePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",
+  docsPath: "/docs",
+  appBasePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",
   siteUrl: "https://docs.example.com",
   navigation: [
     {
@@ -166,8 +151,12 @@ Create the server-side documentation model:
 import { createDocs } from "@sibl/docs/server";
 import config from "@/sibl.config";
 
-export const docs = createDocs(config, { rootDir: process.cwd() });
+export const docs = createDocs(config);
 ```
+
+`createDocs` resolves source paths from the current working directory. Pass an
+explicit `rootDir` only when the Next.js application runs from another
+directory.
 
 ## Render compiled MDX
 
@@ -175,19 +164,14 @@ MDX imports remain static and inspectable. A catch-all route can use a small con
 
 ```ts
 // lib/content.ts
-import type { ComponentType } from "react";
-import { defineDocsContent } from "@sibl/docs/server";
 import Introduction from "@/content/docs/index.mdx";
 import Installation from "@/content/docs/installation.mdx";
 import { docs } from "@/lib/docs";
 
-export const content: Record<string, ComponentType> = defineDocsContent(
-  docs,
-  {
-    "": Introduction,
-    installation: Installation,
-  },
-);
+export const content = docs.defineContent({
+  "": Introduction,
+  installation: Installation,
+});
 ```
 
 ```tsx
@@ -219,26 +203,26 @@ export default async function Page({ params }) {
 
 `DocsPage` is only a convenience composition and expects the MDX source to own its `# Title`. `DocsPageWithHeader` is the explicit manifest-rendered heading variant. Applications can independently use `DocsLayout`, `DocsArticle`, `DocsPageHeader`, `DocsPagination`, `DocsNavigation`, and `DocsTableOfContents`. The layout accepts custom brand, action, sidebar footer, and footer slots.
 
-`defineDocsContent` requires the static import registry to exactly match the
+`docs.defineContent` requires the static import registry to exactly match the
 manifest. `docs.validate()` checks that every source exists and that internal
 documentation links and heading fragments resolve. Calling it from
 `generateStaticParams` makes those checks part of `next build`.
 
 ### Deploy below an origin path
 
-Keep documentation routing and deployment routing separate. `basePath`
-chooses where docs live inside the application; `deploymentBasePath` mirrors
+Keep documentation routing and deployment routing separate. `docsPath`
+chooses where docs live inside the application; `appBasePath` mirrors
 Next.js `basePath` when the entire application is hosted below a path:
 
 ```ts
 // next.config.ts
-const deploymentBasePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(
+const appBasePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(
   /\/+$/,
   "",
 );
 
 const nextConfig = {
-  basePath: deploymentBasePath || undefined,
+  basePath: appBasePath || undefined,
 };
 ```
 

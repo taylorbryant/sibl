@@ -109,13 +109,7 @@ function SidebarMeta({
       <div className="sibl-sidebar-meta-content">
         {content ?? <DefaultProjectLinks config={config} />}
       </div>
-      {showThemeToggle ? (
-        <ThemeToggle
-          darkColor={config.theme.backgroundDark}
-          lightColor={config.theme.background}
-          storageKey={config.theme.storageKey}
-        />
-      ) : null}
+      {showThemeToggle ? <ThemeToggle theme={config.theme} /> : null}
     </div>
   );
 }
@@ -149,10 +143,10 @@ export function DocsLayout({
 }: DocsLayoutProps) {
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const style = {
-    "--sibl-accent-light": config.theme.accent,
-    "--sibl-accent-dark": config.theme.accentDark,
-    "--sibl-background-light": config.theme.background,
-    "--sibl-background-dark": config.theme.backgroundDark,
+    "--sibl-accent-light": config.theme.accent.light,
+    "--sibl-accent-dark": config.theme.accent.dark,
+    "--sibl-background-light": config.theme.background.light,
+    "--sibl-background-dark": config.theme.background.dark,
   } as CSSProperties;
   const brandContent = brand ?? (
     <>
@@ -190,7 +184,7 @@ export function DocsLayout({
 
       <nav className="sibl-mobile-header">
         <div className="sibl-mobile-header-inner">
-          <Link className="sibl-brand" href={config.basePath}>
+          <Link className="sibl-brand" href={config.docsPath}>
             {brandContent}
           </Link>
           <div className="sibl-mobile-actions">
@@ -201,13 +195,7 @@ export function DocsLayout({
                 placeholder={config.search.placeholder}
               />
             ) : null}
-            {showThemeToggle ? (
-              <ThemeToggle
-                darkColor={config.theme.backgroundDark}
-                lightColor={config.theme.background}
-                storageKey={config.theme.storageKey}
-              />
-            ) : null}
+            {showThemeToggle ? <ThemeToggle theme={config.theme} /> : null}
             <button
               aria-expanded={mobileNavigationOpen}
               aria-label={mobileNavigationOpen ? "Close menu" : "Open menu"}
@@ -240,7 +228,7 @@ export function DocsLayout({
       ) : null}
 
       <aside className="sibl-sidebar">
-        <Link className="sibl-brand" href={config.basePath}>
+        <Link className="sibl-brand" href={config.docsPath}>
           {brandContent}
         </Link>
         {showSearch ? (

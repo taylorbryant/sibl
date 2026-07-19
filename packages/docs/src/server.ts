@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import GithubSlugger from "github-slugger";
-import type { DocsConfig, NavigationSection } from "./config.js";
+import type { DocsConfig } from "./config.js";
 import {
   cleanMdx,
   extractHeadingIds,
@@ -17,7 +17,7 @@ import {
 } from "./navigation.js";
 import type { SearchEntry } from "./search.js";
 
-export interface DocsPage {
+export interface DocsPageDescriptor {
   description?: string;
   eyebrow?: string;
   href: string;
@@ -29,7 +29,7 @@ export interface DocsPage {
 }
 
 export interface CreateDocsOptions {
-  rootDir: string;
+  rootDir?: string;
 }
 
 export interface WriteDocsOutputsOptions {
@@ -38,6 +38,25 @@ export interface WriteDocsOutputsOptions {
 
 export class SiblContentError extends Error {
   override name = "SiblContentError";
+}
+
+type DocsContentRegistry = Readonly<Record<string, unknown>>;
+type IndexableDocsContent<T extends DocsContentRegistry> = T &
+  Readonly<Record<string, T[keyof T] | undefined>>;
+
+export interface Docs {
+  readonly config: DocsConfig;
+  defineContent<const T extends DocsContentRegistry>(
+    content: T,
+  ): IndexableDocsContent<T>;
+  generateStaticParams(): Array<{ slug: string[] }>;
+  getLlmsFullText(): Promise<string>;
+  getLlmsText(): Promise<string>;
+  getPage(slug?: string | string[]): DocsPageDescriptor | null;
+  getPages(): DocsPageDescriptor[];
+  getSearchIndex(): Promise<SearchEntry[]>;
+  validate(): Promise<void>;
+  writeOutputs(options?: WriteDocsOutputsOptions): Promise<string[]>;
 }
 
 function absolutePageHref(config: DocsConfig, slug: string): string {
@@ -55,7 +74,7 @@ function absolutePublicHref(config: DocsConfig, href: string): string {
 function descriptor(
   config: DocsConfig,
   item: ReturnType<typeof flattenNavigation>[number],
-): DocsPage {
+): DocsPageDescriptor {
   return {
     description: item.description,
     eyebrow: item.eyebrow,
@@ -80,7 +99,10 @@ function cleanSearchLine(value: string): string {
     .trim();
 }
 
-function searchEntriesForPage(page: DocsPage, source: string): SearchEntry[] {
+function searchEntriesForPage(
+  page: DocsPageDescriptor,
+  source: string,
+): SearchEntry[] {
   const maximumBodyLength = 600;
   const slugger = new GithubSlugger();
   const sections: Array<{
@@ -175,7 +197,7 @@ function deploymentIndependentPath(
   config: DocsConfig,
   pathname: string,
 ): string {
-  const prefix = config.deploymentBasePath;
+  const prefix = config.appBasePath;
   if (!prefix) return normalizedPathname(pathname);
   if (pathname === prefix) return "/";
   if (pathname.startsWith(`${prefix}/`)) {
@@ -185,9 +207,9 @@ function deploymentIndependentPath(
 }
 
 function isDocumentationPath(config: DocsConfig, pathname: string): boolean {
-  if (config.basePath === "/") return true;
+  if (config.docsPath === "/") return true;
   return (
-    pathname === config.basePath || pathname.startsWith(`${config.basePath}/`)
+    pathname === config.docsPath || pathname.startsWith(`${config.docsPath}/`)
   );
 }
 
@@ -198,7 +220,7 @@ function isPublicFile(config: DocsConfig, pathname: string): boolean {
 
 function validateInternalLinks(
   config: DocsConfig,
-  sources: Array<{ page: DocsPage; source: string }>,
+  sources: Array<{ page: DocsPageDescriptor; source: string }>,
 ): void {
   const pagesByPath = new Map(
     sources.map(({ page }) => [normalizedPathname(page.href), page]),
@@ -264,17 +286,50 @@ function validateInternalLinks(
   }
 }
 
-export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
-  const rootDir = path.resolve(/* turbopackIgnore: true */ options.rootDir);
+function validateDocsContent<const T extends DocsContentRegistry>(
+  pages: readonly DocsPageDescriptor[],
+  content: T,
+): IndexableDocsContent<T> {
+  const expected = new Set(pages.map((page) => page.slug));
+  const actual = new Set(Object.keys(content));
+  const missing = [...expected].filter((slug) => !actual.has(slug));
+  const unexpected = [...actual].filter((slug) => !expected.has(slug));
+
+  if (missing.length === 0 && unexpected.length === 0) {
+    return content as IndexableDocsContent<T>;
+  }
+
+  const displaySlug = (slug: string) => (slug === "" ? "<root>" : slug);
+  const details = [
+    missing.length > 0
+      ? `Missing MDX imports for: ${missing.map(displaySlug).join(", ")}.`
+      : "",
+    unexpected.length > 0
+      ? `Unexpected MDX imports for: ${unexpected.map(displaySlug).join(", ")}.`
+      : "",
+  ].filter(Boolean);
+
+  throw new SiblContentError(
+    `The MDX content registry does not match documentation navigation. ${details.join(" ")}`,
+  );
+}
+
+export function createDocs(
+  config: DocsConfig,
+  options: CreateDocsOptions = {},
+): Docs {
+  const rootDir = path.resolve(
+    /* turbopackIgnore: true */ options.rootDir ?? process.cwd(),
+  );
   const pages = flattenNavigation(config.navigation).map((item) =>
     descriptor(config, item),
   );
 
-  function sourcePath(page: DocsPage): string {
+  function sourcePath(page: DocsPageDescriptor): string {
     return path.resolve(/* turbopackIgnore: true */ rootDir, page.source);
   }
 
-  async function readPageSource(page: DocsPage): Promise<string> {
+  async function readPageSource(page: DocsPageDescriptor): Promise<string> {
     try {
       return await readFile(
         /* turbopackIgnore: true */ sourcePath(page),
@@ -294,12 +349,12 @@ export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
     }
   }
 
-  function getPage(slug?: string | string[]): DocsPage | null {
+  function getPage(slug?: string | string[]): DocsPageDescriptor | null {
     const item = findNavigationItem(config, normalizeSlug(slug));
     return item ? descriptor(config, item) : null;
   }
 
-  function getPages(): DocsPage[] {
+  function getPages(): DocsPageDescriptor[] {
     return pages.slice();
   }
 
@@ -399,61 +454,22 @@ export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
     return outputs.map((output) => output.file);
   }
 
+  function defineContent<const T extends DocsContentRegistry>(
+    content: T,
+  ): IndexableDocsContent<T> {
+    return validateDocsContent(pages, content);
+  }
+
   return {
     config,
+    defineContent,
     generateStaticParams,
     getLlmsFullText,
     getLlmsText,
     getPage,
     getPages,
     getSearchIndex,
-    navigation: config.navigation as NavigationSection[],
-    readPageSource,
     validate,
     writeOutputs,
   };
 }
-
-export type DocsSource = ReturnType<typeof createDocs>;
-
-export type DocsContentRegistry = Readonly<Record<string, unknown>>;
-
-/**
- * Verifies that a statically imported MDX registry exactly matches navigation.
- * Keeping this explicit lets Next.js discover every MDX module at build time.
- */
-export function defineDocsContent<const T extends DocsContentRegistry>(
-  docs: Pick<DocsSource, "getPages">,
-  content: T,
-): T {
-  const expected = new Set(docs.getPages().map((page) => page.slug));
-  const actual = new Set(Object.keys(content));
-  const missing = [...expected].filter((slug) => !actual.has(slug));
-  const unexpected = [...actual].filter((slug) => !expected.has(slug));
-
-  if (missing.length === 0 && unexpected.length === 0) return content;
-
-  const displaySlug = (slug: string) => (slug === "" ? "<root>" : slug);
-  const details = [
-    missing.length > 0
-      ? `Missing MDX imports for: ${missing.map(displaySlug).join(", ")}.`
-      : "",
-    unexpected.length > 0
-      ? `Unexpected MDX imports for: ${unexpected.map(displaySlug).join(", ")}.`
-      : "",
-  ].filter(Boolean);
-
-  throw new SiblContentError(
-    `The MDX content registry does not match documentation navigation. ${details.join(" ")}`,
-  );
-}
-
-export type { DocsHeading } from "./markdown.js";
-export {
-  cleanMdx,
-  extractHeadingIds,
-  extractHeadings,
-  slugifyHeading,
-  stripMarkdown,
-} from "./markdown.js";
-export type { SearchEntry } from "./search.js";

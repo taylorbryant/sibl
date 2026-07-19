@@ -5,6 +5,58 @@ const slugPattern =
 const hexColorPattern = /^#[0-9a-f]{6}$/i;
 const routePathPattern = /^\/[a-z0-9./_-]+$/;
 
+const defaultTheme = {
+  accent: { light: "#4f46e5", dark: "#bd93f9" },
+  background: { light: "#ffffff", dark: "#282a36" },
+  mark: "§",
+  storageKey: "sibl-theme",
+};
+
+const hexColor = z.string().regex(hexColorPattern);
+const themeColors = z
+  .object({
+    light: hexColor,
+    dark: hexColor,
+  })
+  .strict();
+
+const docsPath = z
+  .string()
+  .regex(/^\/[a-z0-9/-]*$/, {
+    message: "docsPath must start with / and use lowercase URL segments",
+  })
+  .transform((value) => {
+    if (value === "/") return value;
+    return value.replace(/\/+$/, "");
+  });
+
+const appBasePath = z
+  .string()
+  .regex(/^(?:|\/[a-z0-9/-]*)$/, {
+    message:
+      "appBasePath must be empty or start with / and use lowercase URL segments",
+  })
+  .transform((value) => {
+    if (value === "" || value === "/") return "";
+    return value.replace(/\/+$/, "");
+  });
+
+const themeSchema = z
+  .object({
+    accent: themeColors.default(() => ({ ...defaultTheme.accent })),
+    background: themeColors.default(() => ({ ...defaultTheme.background })),
+    mark: z.string().trim().min(1).max(3).default(defaultTheme.mark),
+    storageKey: z
+      .string()
+      .trim()
+      .regex(/^[a-zA-Z0-9._:-]+$/, {
+        message:
+          "theme.storageKey may only contain letters, numbers, ., _, :, and -",
+      })
+      .default(defaultTheme.storageKey),
+  })
+  .strict();
+
 const safeRelativePath = z
   .string()
   .trim()
@@ -63,30 +115,11 @@ export const docsConfigSchema = z
   .object({
     title: z.string().trim().min(1),
     description: z.string().trim().min(1),
-    basePath: z
-      .string()
-      .regex(/^\/[a-z0-9/-]*$/, {
-        message: "basePath must start with / and use lowercase URL segments",
-      })
-      .transform((value) => {
-        if (value === "/") return value;
-        return value.replace(/\/+$/, "");
-      })
-      .default("/docs"),
-    deploymentBasePath: z
-      .string()
-      .regex(/^(?:|\/[a-z0-9/-]*)$/, {
-        message:
-          "deploymentBasePath must be empty or start with / and use lowercase URL segments",
-      })
-      .transform((value) => {
-        if (value === "" || value === "/") return "";
-        return value.replace(/\/+$/, "");
-      })
-      .default(""),
+    docsPath: docsPath.default("/docs"),
+    appBasePath: appBasePath.default(""),
     siteUrl: z.string().url().optional(),
     navigation: z.array(navigationSectionSchema).min(1),
-    links: z.array(linkSchema).default([]),
+    links: z.array(linkSchema).default(() => []),
     outputs: z
       .object({
         llms: outputPath.default("/llms.txt"),
@@ -94,43 +127,27 @@ export const docsConfigSchema = z
         searchIndex: outputPath.default("/search-index.json"),
       })
       .strict()
-      .default({
+      .default(() => ({
         llms: "/llms.txt",
         llmsFull: "/llms-full.txt",
         searchIndex: "/search-index.json",
-      }),
+      })),
     search: z
       .object({
         enabled: z.boolean().default(true),
         placeholder: z.string().trim().min(1).default("Search documentation…"),
       })
       .strict()
-      .default({ enabled: true, placeholder: "Search documentation…" }),
-    theme: z
-      .object({
-        accent: z.string().regex(hexColorPattern).default("#4f46e5"),
-        accentDark: z.string().regex(hexColorPattern).default("#bd93f9"),
-        background: z.string().regex(hexColorPattern).default("#ffffff"),
-        backgroundDark: z.string().regex(hexColorPattern).default("#282a36"),
-        mark: z.string().trim().min(1).max(3).default("§"),
-        storageKey: z
-          .string()
-          .trim()
-          .regex(/^[a-zA-Z0-9._:-]+$/, {
-            message:
-              "theme.storageKey may only contain letters, numbers, ., _, :, and -",
-          })
-          .default("sibl-theme"),
-      })
-      .strict()
-      .default({
-        accent: "#4f46e5",
-        accentDark: "#bd93f9",
-        background: "#ffffff",
-        backgroundDark: "#282a36",
-        mark: "§",
-        storageKey: "sibl-theme",
-      }),
+      .default(() => ({
+        enabled: true,
+        placeholder: "Search documentation…",
+      })),
+    theme: themeSchema.default(() => ({
+      accent: { ...defaultTheme.accent },
+      background: { ...defaultTheme.background },
+      mark: defaultTheme.mark,
+      storageKey: defaultTheme.storageKey,
+    })),
   })
   .strict()
   .superRefine((config, context) => {
@@ -163,6 +180,7 @@ export type NavigationItem = z.infer<typeof navigationItemSchema>;
 export type NavigationSection = z.infer<typeof navigationSectionSchema>;
 export type DocsConfig = z.output<typeof docsConfigSchema>;
 export type DocsConfigInput = z.input<typeof docsConfigSchema>;
+export type DocsTheme = DocsConfig["theme"];
 
 type DeepReadonly<T> = T extends (...args: never[]) => unknown
   ? T

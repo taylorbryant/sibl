@@ -5,8 +5,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Callout } from "../src/callout.js";
 import { defineDocs } from "../src/config.js";
 import { createMdxComponents } from "../src/mdx.js";
-import { DocsPage, DocsPageWithHeader, DocsThemeScript } from "../src/react.js";
-import type { DocsPage as DocsPageData } from "../src/server.js";
+import {
+  createDocsViewport,
+  DocsPage,
+  DocsPageWithHeader,
+  DocsThemeScript,
+} from "../src/react.js";
+import type { DocsPageDescriptor } from "../src/server.js";
 
 const config = defineDocs({
   title: "Example",
@@ -25,7 +30,7 @@ const config = defineDocs({
   ],
 });
 
-const page: DocsPageData = {
+const page: DocsPageDescriptor = {
   description: "Example overview.",
   href: "/docs",
   section: "Start",
@@ -61,9 +66,10 @@ describe("documentation shell", () => {
   test("bootstraps the browser chrome color with the stored theme", () => {
     const markup = renderToStaticMarkup(
       <DocsThemeScript
-        darkColor="#10131a"
-        lightColor="#f8fafc"
-        storageKey="example-theme"
+        theme={{
+          background: { light: "#f8fafc", dark: "#10131a" },
+          storageKey: "example-theme",
+        }}
       />,
     );
 
@@ -71,6 +77,12 @@ describe("documentation shell", () => {
     expect(markup).toContain("#10131a");
     expect(markup).toContain("#f8fafc");
     expect(markup).toContain("example-theme");
+    expect(createDocsViewport(config.theme)).toEqual({
+      themeColor: [
+        { color: "#ffffff", media: "(prefers-color-scheme: light)" },
+        { color: "#282a36", media: "(prefers-color-scheme: dark)" },
+      ],
+    });
   });
 
   test("offers manifest-rendered headings as an explicit composition", () => {
@@ -152,7 +164,7 @@ describe("MDX components", () => {
   test("prefixes root-relative MDX images for path-based deployments", () => {
     const components: MDXComponents = createMdxComponents(
       {},
-      { config: { deploymentBasePath: "/preview" } },
+      { config: { appBasePath: "/preview" } },
     );
     const Image = components.img as ComponentType<
       ComponentPropsWithoutRef<"img">

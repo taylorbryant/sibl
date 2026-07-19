@@ -3,14 +3,8 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { defineDocs } from "../src/config.js";
-import {
-  cleanMdx,
-  createDocs,
-  defineDocsContent,
-  extractHeadings,
-  SiblContentError,
-  stripMarkdown,
-} from "../src/server.js";
+import { cleanMdx, extractHeadings, stripMarkdown } from "../src/markdown.js";
+import { createDocs, SiblContentError } from "../src/server.js";
 
 const temporaryDirectories: string[] = [];
 
@@ -65,6 +59,15 @@ async function fixture() {
 }
 
 describe("createDocs", () => {
+  test("allows omitted options and exposes only the supported model", async () => {
+    const { config } = await fixture();
+    const docs = createDocs(config);
+
+    expect(docs.getPages()).toHaveLength(2);
+    expect("navigation" in docs).toBe(false);
+    expect("readPageSource" in docs).toBe(false);
+  });
+
   test("returns manifest page descriptors without compiling content", async () => {
     const { docs } = await fixture();
     const page = docs.getPage([]);
@@ -134,12 +137,12 @@ describe("createDocs", () => {
     const { docs } = await fixture();
     const content = { "": "overview", install: "installation" } as const;
 
-    expect(defineDocsContent(docs, content)).toBe(content);
-    expect(() => defineDocsContent(docs, { "": "overview" })).toThrow(
+    expect(docs.defineContent(content)).toBe(content);
+    expect(() => docs.defineContent({ "": "overview" })).toThrow(
       "Missing MDX imports for: install",
     );
     expect(() =>
-      defineDocsContent(docs, {
+      docs.defineContent({
         "": "overview",
         install: "installation",
         old: "removed",
@@ -151,7 +154,7 @@ describe("createDocs", () => {
     const { config, rootDir } = await fixture();
     const prefixed = defineDocs({
       ...config,
-      deploymentBasePath: "/project",
+      appBasePath: "/project",
     });
     const docs = createDocs(prefixed, { rootDir });
 

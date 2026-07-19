@@ -9,7 +9,13 @@ interface TocHeading {
   text: string;
 }
 
-export function DocsTableOfContents({ minimumHeadings = 3 }) {
+export interface DocsTableOfContentsProps {
+  minimumHeadings?: number;
+}
+
+export function DocsTableOfContents({
+  minimumHeadings = 3,
+}: DocsTableOfContentsProps) {
   const pathname = usePathname();
   const [headings, setHeadings] = useState<TocHeading[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);

@@ -1,7 +1,7 @@
-import { DocsThemeScript } from "@sibl/docs/react";
+import { createDocsViewport, DocsThemeScript } from "@sibl/docs/react";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "@sibl/docs/styles.css";
 import config from "@/sibl.config";
@@ -16,18 +16,7 @@ export const metadata: Metadata = {
     "Explicit, Next-native documentation primitives for people and agents.",
 };
 
-export const viewport: Viewport = {
-  themeColor: [
-    {
-      color: config.theme.background,
-      media: "(prefers-color-scheme: light)",
-    },
-    {
-      color: config.theme.backgroundDark,
-      media: "(prefers-color-scheme: dark)",
-    },
-  ],
-};
+export const viewport = createDocsViewport(config.theme);
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -37,11 +26,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <body>
-        <DocsThemeScript
-          darkColor={config.theme.backgroundDark}
-          lightColor={config.theme.background}
-          storageKey={config.theme.storageKey}
-        />
+        <DocsThemeScript theme={config.theme} />
         {children}
       </body>
     </html>

@@ -66,7 +66,7 @@ function HeadingWithPermalink({
 }
 
 export interface CreateMdxComponentsOptions {
-  config?: Pick<DocsConfig, "deploymentBasePath">;
+  config?: Pick<DocsConfig, "appBasePath">;
 }
 
 export function createMdxComponents(
