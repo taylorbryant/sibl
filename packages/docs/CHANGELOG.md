@@ -1,5 +1,12 @@
 # @sibl/docs
 
+## 0.2.1
+
+### Patch Changes
+
+- Render search input focus as one intentional ring around the complete search
+  field instead of overlapping outlines around its inner controls.
+
 ## 0.2.0
 
 ### Minor Changes
