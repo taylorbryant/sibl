@@ -21,3 +21,6 @@ written static files.
 
 Remove native JSX markup from agent-readable output while preserving prose and
 inline code, and keep CSS-rendered permalinks out of table-of-contents labels.
+
+Keep supported browser chrome in sync with the active documentation theme and
+expose light and dark background colors through the typed theme config.

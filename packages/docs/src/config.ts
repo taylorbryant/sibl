@@ -110,6 +110,8 @@ export const docsConfigSchema = z
       .object({
         accent: z.string().regex(hexColorPattern).default("#4f46e5"),
         accentDark: z.string().regex(hexColorPattern).default("#bd93f9"),
+        background: z.string().regex(hexColorPattern).default("#ffffff"),
+        backgroundDark: z.string().regex(hexColorPattern).default("#282a36"),
         mark: z.string().trim().min(1).max(3).default("§"),
         storageKey: z
           .string()
@@ -124,6 +126,8 @@ export const docsConfigSchema = z
       .default({
         accent: "#4f46e5",
         accentDark: "#bd93f9",
+        background: "#ffffff",
+        backgroundDark: "#282a36",
         mark: "§",
         storageKey: "sibl-theme",
       }),

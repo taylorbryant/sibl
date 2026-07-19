@@ -34,6 +34,8 @@ describe("defineDocs", () => {
     expect(config.theme.mark).toBe("§");
     expect(config.theme.accent).toBe("#4f46e5");
     expect(config.theme.accentDark).toBe("#bd93f9");
+    expect(config.theme.background).toBe("#ffffff");
+    expect(config.theme.backgroundDark).toBe("#282a36");
     expect(config.outputs.searchIndex).toBe("/search-index.json");
     expect(config.search.enabled).toBe(true);
   });

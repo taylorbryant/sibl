@@ -20,8 +20,10 @@ body:has(> .sibl-root) {
 .sibl-root {
   --sibl-accent-light: #4f46e5;
   --sibl-accent-dark: #bd93f9;
+  --sibl-background-light: #fff;
+  --sibl-background-dark: #282a36;
   --sibl-accent: var(--sibl-accent-light);
-  --sibl-bg: var(--color-bg, #fff);
+  --sibl-bg: var(--color-bg, var(--sibl-background-light));
   --sibl-surface: var(--color-surface, #f8fafc);
   --sibl-surface-muted: var(--color-surface-muted, #f1f5f9);
   --sibl-ink: var(--color-ink, #0f172a);
@@ -58,7 +60,7 @@ body:has(> .sibl-root) {
 
 .dark .sibl-root {
   --sibl-accent: var(--sibl-accent-dark);
-  --sibl-bg: var(--color-bg, #282a36);
+  --sibl-bg: var(--color-bg, var(--sibl-background-dark));
   --sibl-surface: var(--color-surface, #21222c);
   --sibl-surface-muted: var(--color-surface-muted, #343746);
   --sibl-ink: var(--color-ink, #f8f8f2);

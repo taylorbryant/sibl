@@ -14,7 +14,7 @@ The config is both a runtime-validated object and the source of the public navig
 | `links` | `[]` | Project links shown beside the sidebar controls |
 | `outputs` | standard paths | Locations for search and agent outputs |
 | `search` | enabled | Search visibility and placeholder |
-| `theme` | Sibl defaults | Light/dark accents, mark, and storage key |
+| `theme` | Sibl defaults | Light/dark backgrounds and accents, mark, and storage key |
 
 ## Navigation sections
 
@@ -57,6 +57,27 @@ export default defineDocs({
 ```
 
 Pass the same value to `basePath` in `next.config.ts`. Sibl applies it to public search and agent-output URLs while leaving Next.js to prefix router links.
+
+## Browser chrome
+
+`theme.background` and `theme.backgroundDark` color the documentation canvas and provide the values for browser chrome on supported browsers. Export them through Next.js viewport metadata, then pass them to the pre-hydration theme script:
+
+```tsx
+export const viewport = {
+  themeColor: [
+    { color: config.theme.background, media: "(prefers-color-scheme: light)" },
+    { color: config.theme.backgroundDark, media: "(prefers-color-scheme: dark)" },
+  ],
+};
+
+<DocsThemeScript
+  darkColor={config.theme.backgroundDark}
+  lightColor={config.theme.background}
+  storageKey={config.theme.storageKey}
+/>;
+```
+
+The media-aware metadata supplies the system default. `DocsThemeScript` and the built-in toggle update `theme-color` when the stored Sibl preference differs from the device setting.
 
 ## Code highlighting
 

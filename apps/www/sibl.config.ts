@@ -73,6 +73,8 @@ export default defineDocs({
   theme: {
     accent: "#4f46e5",
     accentDark: "#bd93f9",
+    background: "#ffffff",
+    backgroundDark: "#282a36",
     mark: "§",
     storageKey: "sibl-docs-theme",
   },

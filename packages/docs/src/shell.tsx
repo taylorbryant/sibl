@@ -110,7 +110,11 @@ function SidebarMeta({
         {content ?? <DefaultProjectLinks config={config} />}
       </div>
       {showThemeToggle ? (
-        <ThemeToggle storageKey={config.theme.storageKey} />
+        <ThemeToggle
+          darkColor={config.theme.backgroundDark}
+          lightColor={config.theme.background}
+          storageKey={config.theme.storageKey}
+        />
       ) : null}
     </div>
   );
@@ -147,6 +151,8 @@ export function DocsLayout({
   const style = {
     "--sibl-accent-light": config.theme.accent,
     "--sibl-accent-dark": config.theme.accentDark,
+    "--sibl-background-light": config.theme.background,
+    "--sibl-background-dark": config.theme.backgroundDark,
   } as CSSProperties;
   const brandContent = brand ?? (
     <>
@@ -196,7 +202,11 @@ export function DocsLayout({
               />
             ) : null}
             {showThemeToggle ? (
-              <ThemeToggle storageKey={config.theme.storageKey} />
+              <ThemeToggle
+                darkColor={config.theme.backgroundDark}
+                lightColor={config.theme.background}
+                storageKey={config.theme.storageKey}
+              />
             ) : null}
             <button
               aria-expanded={mobileNavigationOpen}

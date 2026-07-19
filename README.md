@@ -47,11 +47,28 @@ import { DocsThemeScript } from "@sibl/docs/react";
 import "@sibl/docs/styles.css";
 import config from "@/sibl.config";
 
+export const viewport = {
+  themeColor: [
+    {
+      color: config.theme.background,
+      media: "(prefers-color-scheme: light)",
+    },
+    {
+      color: config.theme.backgroundDark,
+      media: "(prefers-color-scheme: dark)",
+    },
+  ],
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <DocsThemeScript storageKey={config.theme.storageKey} />
+        <DocsThemeScript
+          darkColor={config.theme.backgroundDark}
+          lightColor={config.theme.background}
+          storageKey={config.theme.storageKey}
+        />
         {children}
       </body>
     </html>
@@ -59,7 +76,7 @@ export default function RootLayout({ children }) {
 }
 ```
 
-`suppressHydrationWarning` accounts for the theme class applied before React hydrates.
+`suppressHydrationWarning` accounts for the theme class applied before React hydrates. The viewport colors give browser chrome a correct system-theme fallback, while `DocsThemeScript` updates them before hydration when the stored Sibl theme overrides the system preference.
 
 ## Configure MDX
 

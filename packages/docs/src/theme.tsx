@@ -5,7 +5,16 @@ import { useCallback, useEffect, useState } from "react";
 
 export type Theme = "light" | "dark" | "system";
 
+export interface ThemeColors {
+  dark: string;
+  light: string;
+}
+
 const darkQuery = "(prefers-color-scheme: dark)";
+const defaultThemeColors: ThemeColors = {
+  dark: "#282a36",
+  light: "#ffffff",
+};
 
 function readTheme(storageKey: string): Theme {
   try {
@@ -19,14 +28,33 @@ function readTheme(storageKey: string): Theme {
   return "system";
 }
 
-function applyTheme(theme: Theme): void {
+function updateBrowserThemeColor(color: string): void {
+  const themeColors = Array.from(
+    document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]'),
+  );
+  if (themeColors.length === 0) {
+    const themeColor = document.createElement("meta");
+    themeColor.name = "theme-color";
+    document.head.append(themeColor);
+    themeColors.push(themeColor);
+  }
+  for (const themeColor of themeColors) themeColor.content = color;
+}
+
+function applyTheme(theme: Theme, colors: ThemeColors): void {
   const dark =
     theme === "dark" ||
     (theme === "system" && window.matchMedia(darkQuery).matches);
   document.documentElement.classList.toggle("dark", dark);
+  updateBrowserThemeColor(dark ? colors.dark : colors.light);
 }
 
-export function useDocsTheme(storageKey: string) {
+export function useDocsTheme(
+  storageKey: string,
+  colors: ThemeColors = defaultThemeColors,
+) {
+  const darkColor = colors.dark;
+  const lightColor = colors.light;
   const [theme, setThemeState] = useState<Theme>("system");
   const changeEvent = `sibl-theme-change:${storageKey}`;
 
@@ -34,7 +62,7 @@ export function useDocsTheme(storageKey: string) {
     const sync = () => {
       const stored = readTheme(storageKey);
       setThemeState(stored);
-      applyTheme(stored);
+      applyTheme(stored, { dark: darkColor, light: lightColor });
     };
     sync();
     window.addEventListener(changeEvent, sync);
@@ -43,20 +71,21 @@ export function useDocsTheme(storageKey: string) {
       window.removeEventListener(changeEvent, sync);
       window.removeEventListener("storage", sync);
     };
-  }, [changeEvent, storageKey]);
+  }, [changeEvent, darkColor, lightColor, storageKey]);
 
   useEffect(() => {
     if (theme !== "system") return;
     const query = window.matchMedia(darkQuery);
-    const update = () => applyTheme("system");
+    const update = () =>
+      applyTheme("system", { dark: darkColor, light: lightColor });
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
-  }, [theme]);
+  }, [darkColor, lightColor, theme]);
 
   const setTheme = useCallback(
     (next: Theme) => {
       setThemeState(next);
-      applyTheme(next);
+      applyTheme(next, { dark: darkColor, light: lightColor });
       try {
         localStorage.setItem(storageKey, next);
       } catch {
@@ -64,7 +93,7 @@ export function useDocsTheme(storageKey: string) {
       }
       window.dispatchEvent(new Event(changeEvent));
     },
-    [changeEvent, storageKey],
+    [changeEvent, darkColor, lightColor, storageKey],
   );
 
   return { setTheme, theme };
@@ -126,8 +155,19 @@ const themeOptions: Array<{ icon: ReactNode; label: string; value: Theme }> = [
   },
 ];
 
-export function ThemeToggle({ storageKey }: { storageKey: string }) {
-  const { setTheme, theme } = useDocsTheme(storageKey);
+export interface ThemeToggleProps {
+  darkColor?: string;
+  lightColor?: string;
+  storageKey: string;
+}
+
+export function ThemeToggle({
+  darkColor = defaultThemeColors.dark,
+  lightColor = defaultThemeColors.light,
+  storageKey,
+}: ThemeToggleProps) {
+  const colors = { dark: darkColor, light: lightColor };
+  const { setTheme, theme } = useDocsTheme(storageKey, colors);
 
   return (
     <fieldset className="sibl-theme-toggle" aria-label="Theme">

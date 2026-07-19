@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Callout } from "../src/callout.js";
 import { defineDocs } from "../src/config.js";
 import { createMdxComponents } from "../src/mdx.js";
-import { DocsPage, DocsPageWithHeader } from "../src/react.js";
+import { DocsPage, DocsPageWithHeader, DocsThemeScript } from "../src/react.js";
 import type { DocsPage as DocsPageData } from "../src/server.js";
 
 const config = defineDocs({
@@ -52,8 +52,25 @@ describe("documentation shell", () => {
     expect(markup).toContain('class="sibl-mobile-header"');
     expect(markup).toContain('class="sibl-sidebar"');
     expect(markup).toContain('class="sibl-main"');
+    expect(markup).toContain("--sibl-background-light:#ffffff");
+    expect(markup).toContain("--sibl-background-dark:#282a36");
     expect(markup).toContain("MDX-owned title");
     expect(markup).not.toContain('class="sibl-page-header"');
+  });
+
+  test("bootstraps the browser chrome color with the stored theme", () => {
+    const markup = renderToStaticMarkup(
+      <DocsThemeScript
+        darkColor="#10131a"
+        lightColor="#f8fafc"
+        storageKey="example-theme"
+      />,
+    );
+
+    expect(markup).toContain('meta[name="theme-color"]');
+    expect(markup).toContain("#10131a");
+    expect(markup).toContain("#f8fafc");
+    expect(markup).toContain("example-theme");
   });
 
   test("offers manifest-rendered headings as an explicit composition", () => {

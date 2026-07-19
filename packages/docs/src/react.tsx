@@ -9,13 +9,29 @@ function classNames(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
 
-export function DocsThemeScript({ storageKey }: { storageKey: string }) {
-  const serializedStorageKey = JSON.stringify(storageKey).replaceAll(
-    "<",
-    "\\u003c",
-  );
-  const script = `(function(){try{var k=${serializedStorageKey};var t=localStorage.getItem(k);var d=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}})()`;
-  // biome-ignore lint/security/noDangerouslySetInnerHtml: The pre-hydration theme bootstrap contains only a JSON-escaped storage key and static code.
+function serializeInlineScriptValue(value: string): string {
+  return JSON.stringify(value)
+    .replaceAll("<", "\\u003c")
+    .replaceAll("\u2028", "\\u2028")
+    .replaceAll("\u2029", "\\u2029");
+}
+
+export interface DocsThemeScriptProps {
+  darkColor?: string;
+  lightColor?: string;
+  storageKey: string;
+}
+
+export function DocsThemeScript({
+  darkColor = "#282a36",
+  lightColor = "#ffffff",
+  storageKey,
+}: DocsThemeScriptProps) {
+  const serializedStorageKey = serializeInlineScriptValue(storageKey);
+  const serializedDarkColor = serializeInlineScriptValue(darkColor);
+  const serializedLightColor = serializeInlineScriptValue(lightColor);
+  const script = `(function(){try{var k=${serializedStorageKey};var t=localStorage.getItem(k);var d=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);var c=d?${serializedDarkColor}:${serializedLightColor};var m=document.querySelectorAll('meta[name="theme-color"]');if(!m.length){var n=document.createElement("meta");n.name="theme-color";document.head.appendChild(n);m=[n]}for(var i=0;i<m.length;i++)m[i].content=c}catch(e){}})()`;
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: The pre-hydration theme bootstrap contains only JSON-escaped config values and static code.
   return <script dangerouslySetInnerHTML={{ __html: script }} />;
 }
 
@@ -118,5 +134,11 @@ export {
   DocsNavigation,
   type DocsNavigationProps,
 } from "./shell.js";
-export { type Theme, ThemeToggle, useDocsTheme } from "./theme.js";
+export {
+  type Theme,
+  type ThemeColors,
+  ThemeToggle,
+  type ThemeToggleProps,
+  useDocsTheme,
+} from "./theme.js";
 export { DocsTableOfContents } from "./toc.js";
