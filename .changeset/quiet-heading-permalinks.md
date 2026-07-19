@@ -9,3 +9,5 @@ Give every fenced code block a persistent header with a readable language
 label and copy button.
 
 Match callout title spacing to the shared documentation layout.
+
+Increase blockquote contrast in light and dark themes.

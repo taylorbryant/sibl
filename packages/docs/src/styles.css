@@ -485,9 +485,9 @@ body:has(> .sibl-root) {
 
 .sibl-prose blockquote {
   margin: 16px 0;
-  border-left: 2px solid color-mix(in srgb, var(--sibl-accent) 30%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--sibl-accent) 65%, transparent);
   padding-left: 16px;
-  color: var(--sibl-ink-muted);
+  color: var(--sibl-ink-light);
   font-style: italic;
 }
 
