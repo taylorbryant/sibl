@@ -1,0 +1,81 @@
+# Kitchen sink
+
+This page exercises every component in Sibl's default MDX surface. Use it to review typography, color, spacing, and interactive states when changing a theme.
+
+## Typography
+
+Paragraphs support **bold text**, *italic text*, and `inline code`. The surrounding prose keeps a consistent measure and vertical rhythm.
+
+### Third-level heading
+
+Headings at levels two and three include a separate permalink control without turning the heading text into a link.
+
+## Links
+
+Use an [internal link](/docs/installation) to move within the documentation or an [external link](https://nextjs.org/docs) to open another site.
+
+## Lists
+
+An unordered list works well when sequence does not matter:
+
+- Explicit navigation
+- Ordinary MDX files
+- Server-rendered content
+
+An ordered list communicates a sequence:
+
+1. Define the documentation manifest.
+2. Connect the MDX components.
+3. Render the shared shell.
+
+## Blockquote
+
+> Documentation should make the important path obvious and keep the underlying framework visible.
+
+## Callouts
+
+<Callout title="A note">
+  Notes add context without interrupting the main flow.
+</Callout>
+
+<Callout type="warning" title="A warning">
+  Warnings call attention to constraints, risks, or actions that deserve extra care.
+</Callout>
+
+## Code
+
+Inline code such as `createMdxComponents()` sits naturally inside a sentence.
+
+A single-line fenced block still includes its language and copy control:
+
+```bash
+bun add @sibl/docs
+```
+
+Multiline blocks use the same persistent header:
+
+```tsx
+import { createMdxComponents } from "@sibl/docs/mdx";
+
+export function useMDXComponents() {
+  return createMdxComponents();
+}
+```
+
+## Table
+
+| Component | Purpose | Interactive |
+| --- | --- | --- |
+| Heading | Structures a page and exposes a permalink | Yes |
+| Link | Connects internal or external resources | Yes |
+| Code block | Presents highlighted, copyable source | Yes |
+| Table | Compares structured information | No |
+| Image | Adds visual context with alternative text | No |
+
+## Image
+
+![An abstract composition of Sibl documentation surfaces](/kitchen-sink.svg)
+
+---
+
+That rule marks the end of the default component preview.

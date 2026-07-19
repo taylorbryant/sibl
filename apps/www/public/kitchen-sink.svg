@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Sibl documentation surfaces</title>
+  <desc id="description">An abstract arrangement of documentation panels, navigation lines, and code blocks in indigo and violet.</desc>
+  <rect width="1200" height="630" fill="#f7f7fc"/>
+  <rect x="64" y="64" width="1072" height="502" rx="32" fill="#ffffff" stroke="#d9d8ee" stroke-width="4"/>
+  <rect x="64" y="64" width="280" height="502" rx="32" fill="#f0f0fb"/>
+  <path d="M344 64v502" stroke="#d9d8ee" stroke-width="4"/>
+  <circle cx="124" cy="130" r="20" fill="#4f46e5"/>
+  <rect x="164" y="114" width="116" height="20" rx="10" fill="#252538"/>
+  <rect x="112" y="196" width="152" height="14" rx="7" fill="#8c8ba3"/>
+  <rect x="112" y="236" width="184" height="14" rx="7" fill="#c0bfd3"/>
+  <rect x="112" y="276" width="132" height="14" rx="7" fill="#c0bfd3"/>
+  <rect x="408" y="112" width="392" height="34" rx="12" fill="#252538"/>
+  <rect x="408" y="174" width="612" height="16" rx="8" fill="#8c8ba3"/>
+  <rect x="408" y="206" width="536" height="16" rx="8" fill="#c0bfd3"/>
+  <rect x="408" y="260" width="664" height="218" rx="20" fill="#282a36"/>
+  <rect x="408" y="260" width="664" height="56" rx="20" fill="#343746"/>
+  <path d="M408 316h664" stroke="#4c5063" stroke-width="3"/>
+  <rect x="444" y="282" width="86" height="12" rx="6" fill="#bd93f9"/>
+  <rect x="444" y="352" width="344" height="14" rx="7" fill="#f8f8f2" opacity=".86"/>
+  <rect x="444" y="390" width="516" height="14" rx="7" fill="#8be9fd" opacity=".78"/>
+  <rect x="444" y="428" width="412" height="14" rx="7" fill="#50fa7b" opacity=".72"/>
+</svg>

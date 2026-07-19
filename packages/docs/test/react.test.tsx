@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { MDXComponents } from "mdx/types";
 import type { ComponentPropsWithoutRef, ComponentType } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { Callout } from "../src/callout.js";
 import { defineDocs } from "../src/config.js";
 import { createMdxComponents } from "../src/mdx.js";
 import { DocsPage, DocsPageWithHeader } from "../src/react.js";
@@ -68,6 +69,17 @@ describe("documentation shell", () => {
 });
 
 describe("MDX components", () => {
+  test("keeps callout titles outside global paragraph spacing", () => {
+    const markup = renderToStaticMarkup(
+      <Callout title="Context">
+        <p>Supporting detail.</p>
+      </Callout>,
+    );
+
+    expect(markup).toContain('<div class="sibl-callout-title">Context</div>');
+    expect(markup).not.toContain('<p class="sibl-callout-title">');
+  });
+
   test("keeps heading text plain and exposes a separate permalink", () => {
     const components: MDXComponents = createMdxComponents();
     const Heading = components.h2 as ComponentType<

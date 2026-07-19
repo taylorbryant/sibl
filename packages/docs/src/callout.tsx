@@ -9,9 +9,9 @@ export interface CalloutProps {
 export function Callout({ children, title, type = "note" }: CalloutProps) {
   return (
     <aside className="sibl-callout" data-type={type}>
-      <p className="sibl-callout-title">
+      <div className="sibl-callout-title">
         {title ?? (type === "warning" ? "Warning" : "Note")}
-      </p>
+      </div>
       <div className="sibl-callout-content">{children}</div>
     </aside>
   );

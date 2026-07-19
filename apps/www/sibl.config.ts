@@ -55,6 +55,13 @@ export default defineDocs({
             "Publish the same documentation corpus for humans, search, and agents.",
           badge: "AI",
         },
+        {
+          title: "Kitchen sink",
+          slug: "kitchen-sink",
+          source: "content/docs/kitchen-sink.mdx",
+          eyebrow: "Reference",
+          description: "Preview every component in Sibl's default MDX surface.",
+        },
       ],
     },
   ],
