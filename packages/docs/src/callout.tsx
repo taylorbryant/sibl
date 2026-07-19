@@ -6,11 +6,7 @@ export interface CalloutProps {
   type?: "note" | "warning";
 }
 
-export function Callout({
-  children,
-  title,
-  type = "note",
-}: CalloutProps) {
+export function Callout({ children, title, type = "note" }: CalloutProps) {
   return (
     <aside className="sibl-callout" data-type={type}>
       <p className="sibl-callout-title">

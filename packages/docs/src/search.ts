@@ -69,7 +69,8 @@ export function makeSearchSnippet(body: string, terms: string[]): string {
 
   for (const term of terms) {
     const index = lower.indexOf(term);
-    if (index >= 0 && (matchIndex < 0 || index < matchIndex)) matchIndex = index;
+    if (index >= 0 && (matchIndex < 0 || index < matchIndex))
+      matchIndex = index;
   }
 
   let start = matchIndex < 0 ? 0 : Math.max(0, matchIndex - 42);

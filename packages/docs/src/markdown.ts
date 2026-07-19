@@ -91,12 +91,13 @@ export function cleanMdx(source: string): string {
       cleaned = `${cleaned.slice(0, open)} ${cleaned.slice(close + 1)}`;
     }
 
-    output.push(
-      cleaned.replace(/\{\/\*[\s\S]*?\*\/\}/g, " ").trimEnd(),
-    );
+    output.push(cleaned.replace(/\{\/\*[\s\S]*?\*\/\}/g, " ").trimEnd());
   }
 
-  return output.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  return output
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 export function stripMarkdown(markdown: string): string {

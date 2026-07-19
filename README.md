@@ -199,6 +199,7 @@ outputs locally.
 
 ```bash
 bun run check
+bun run format
 ```
 
 ## License

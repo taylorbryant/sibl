@@ -9,14 +9,18 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "build:docs": "turbo run build --filter=@sibl/site",
+    "build:docs": "turbo run build --filter=@sibl/www",
     "build:package": "turbo run build --filter=@sibl/docs",
-    "dev": "turbo run dev --filter=@sibl/site",
+    "dev": "turbo run dev --filter=@sibl/www",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "check": "turbo run build typecheck test"
+    "check": "biome check . && turbo run build typecheck test"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.4",
     "@types/bun": "latest",
     "@types/node": "^26.1.1",
     "turbo": "^2.10.5",

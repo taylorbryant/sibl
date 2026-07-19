@@ -1,8 +1,8 @@
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import {
-  isValidElement,
   type ComponentPropsWithoutRef,
+  isValidElement,
   type ReactNode,
 } from "react";
 import { Callout } from "./callout.js";
@@ -81,10 +81,13 @@ export function createMdxComponents(
         <table {...props}>{children}</table>
       </div>
     ),
-    img: ({ alt = "", ...props }) => <img alt={alt} {...props} />,
+    img: ({ alt = "", ...props }) => (
+      // biome-ignore lint/performance/noImgElement: Generic MDX images do not necessarily provide the dimensions or loader required by next/image.
+      <img alt={alt} {...props} />
+    ),
     ...components,
   };
 }
 
-export { Callout, type CalloutProps } from "./callout.js";
 export type { MDXComponents } from "mdx/types";
+export { Callout, type CalloutProps } from "./callout.js";

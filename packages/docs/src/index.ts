@@ -1,23 +1,23 @@
 export {
-  defineDocs,
-  docsConfigSchema,
   type DocsConfig,
   type DocsConfigInput,
+  defineDocs,
+  docsConfigSchema,
   type NavigationItem,
   type NavigationSection,
 } from "./config.js";
 export {
   adjacentNavigationItems,
+  type FlatNavigationItem,
   findNavigationItem,
   flattenNavigation,
   normalizeSlug,
   pageHref,
-  type FlatNavigationItem,
 } from "./navigation.js";
 export {
   makeSearchSnippet,
-  searchDocs,
-  tokenizeSearch,
   type SearchEntry,
   type SearchResult,
+  searchDocs,
+  tokenizeSearch,
 } from "./search.js";

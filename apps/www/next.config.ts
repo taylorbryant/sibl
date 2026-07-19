@@ -1,6 +1,6 @@
 import createMDX from "@next/mdx";
-import type { NextConfig } from "next";
 import { createMdxOptions } from "@sibl/docs/mdx-config";
+import type { NextConfig } from "next";
 
 const withMDX = createMDX({
   options: createMdxOptions(),

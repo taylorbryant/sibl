@@ -2,18 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import {
+  type KeyboardEvent as ReactKeyboardEvent,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import {
-  searchDocs,
-  tokenizeSearch,
   type SearchEntry,
   type SearchResult,
+  searchDocs,
+  tokenizeSearch,
 } from "./search.js";
 
 const indexRequests = new Map<string, Promise<SearchEntry[]>>();
@@ -48,11 +48,18 @@ function Highlight({ text, terms }: { text: string; terms: string[] }) {
   }, [terms]);
 
   if (!pattern) return <>{text}</>;
+  let offset = 0;
   return (
     <>
-      {text.split(pattern).map((part, index) =>
-        index % 2 === 1 ? <mark key={`${part}-${index}`}>{part}</mark> : part,
-      )}
+      {text.split(pattern).map((part, index) => {
+        const start = offset;
+        offset += part.length;
+        return index % 2 === 1 ? (
+          <mark key={`${start}-${part}`}>{part}</mark>
+        ) : (
+          part
+        );
+      })}
     </>
   );
 }
@@ -102,7 +109,9 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
   }, [indexUrl]);
 
   useEffect(() => {
-    const option = listRef.current?.querySelector('[aria-selected="true"]');
+    const option = listRef.current?.querySelector(
+      `#sibl-search-option-${activeIndex}`,
+    );
     option?.scrollIntoView({ block: "nearest" });
   }, [activeIndex]);
 
@@ -134,6 +143,7 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
   let previousSection: string | null = null;
 
   return createPortal(
+    // biome-ignore lint/a11y/noStaticElementInteractions: The backdrop handles pointer dismissal only; the dialog also provides Escape and a labeled close button.
     <div
       className="sibl-search-backdrop"
       onMouseDown={(event) => {
@@ -157,7 +167,9 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
               setActiveIndex(0);
             }}
             aria-activedescendant={
-              results.length > 0 ? `sibl-search-option-${activeIndex}` : undefined
+              results.length > 0
+                ? `sibl-search-option-${activeIndex}`
+                : undefined
             }
             aria-autocomplete="list"
             aria-controls="sibl-search-results"

@@ -4,10 +4,10 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { defineDocs } from "../src/config.js";
 import {
-  SiblContentError,
   cleanMdx,
   createDocs,
   extractHeadings,
+  SiblContentError,
   stripMarkdown,
 } from "../src/server.js";
 
@@ -15,9 +15,9 @@ const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
   await Promise.all(
-    temporaryDirectories.splice(0).map((directory) =>
-      rm(directory, { force: true, recursive: true }),
-    ),
+    temporaryDirectories
+      .splice(0)
+      .map((directory) => rm(directory, { force: true, recursive: true })),
   );
 });
 
@@ -116,8 +116,9 @@ describe("createDocs", () => {
     const files = await docs.writeOutputs({ outputDir: "generated" });
 
     expect(files).toHaveLength(3);
-    expect(await readFile(path.join(rootDir, "generated/llms.txt"), "utf8"))
-      .toContain("# Example");
+    expect(
+      await readFile(path.join(rootDir, "generated/llms.txt"), "utf8"),
+    ).toContain("# Example");
     expect(
       JSON.parse(
         await readFile(

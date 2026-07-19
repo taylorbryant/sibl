@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { searchDocs, tokenizeSearch, type SearchEntry } from "../src/search.js";
+import { type SearchEntry, searchDocs, tokenizeSearch } from "../src/search.js";
 
 const entries: SearchEntry[] = [
   {
@@ -29,9 +29,9 @@ describe("searchDocs", () => {
   });
 
   test("returns page introductions for an empty query", () => {
-    expect(searchDocs(entries, "").map((result) => result.entry.heading)).toEqual([
-      "Introduction",
-    ]);
+    expect(
+      searchDocs(entries, "").map((result) => result.entry.heading),
+    ).toEqual(["Introduction"]);
   });
 
   test("limits and normalizes query terms", () => {

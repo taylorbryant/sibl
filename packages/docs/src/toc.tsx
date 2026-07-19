@@ -14,6 +14,7 @@ export function DocsTableOfContents({ minimumHeadings = 2 }) {
   const [headings, setHeadings] = useState<TocHeading[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Navigation replaces the article headings, so the observer must be rebuilt for each pathname.
   useEffect(() => {
     const elements = Array.from(
       document.querySelectorAll<HTMLElement>(

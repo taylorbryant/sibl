@@ -75,9 +75,7 @@ function searchEntriesForPage(page: DocsPage, source: string): SearchEntry[] {
     headingId: string;
     prose: string[];
     code: string[];
-  }> = [
-    { heading: page.title, headingId: "", prose: [], code: [] },
-  ];
+  }> = [{ heading: page.title, headingId: "", prose: [], code: [] }];
   let current = sections[0];
   let inFence = false;
 
@@ -277,11 +275,11 @@ export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
 
 export type DocsSource = ReturnType<typeof createDocs>;
 
+export type { DocsHeading } from "./markdown.js";
 export {
   cleanMdx,
   extractHeadings,
   slugifyHeading,
   stripMarkdown,
 } from "./markdown.js";
-export type { DocsHeading } from "./markdown.js";
 export type { SearchEntry } from "./search.js";

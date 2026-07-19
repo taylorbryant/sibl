@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-const slugPattern = /^(?:[a-z0-9]+(?:-[a-z0-9]+)*)(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$|^$/;
+const slugPattern =
+  /^(?:[a-z0-9]+(?:-[a-z0-9]+)*)(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$|^$/;
 const hexColorPattern = /^#[0-9a-f]{6}$/i;
 const routePathPattern = /^\/[a-z0-9./_-]+$/;
 
@@ -103,7 +104,8 @@ export const docsConfigSchema = z
           .string()
           .trim()
           .regex(/^[a-zA-Z0-9._:-]+$/, {
-            message: "theme.storageKey may only contain letters, numbers, ., _, :, and -",
+            message:
+              "theme.storageKey may only contain letters, numbers, ., _, :, and -",
           })
           .default("sibl-theme"),
       })

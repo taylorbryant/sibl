@@ -12,7 +12,12 @@ function classNames(...values: Array<string | false | null | undefined>) {
 }
 
 export function DocsThemeScript({ storageKey }: { storageKey: string }) {
-  const script = `(function(){try{var k=${JSON.stringify(storageKey)};var t=localStorage.getItem(k);var d=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}})()`;
+  const serializedStorageKey = JSON.stringify(storageKey).replaceAll(
+    "<",
+    "\\u003c",
+  );
+  const script = `(function(){try{var k=${serializedStorageKey};var t=localStorage.getItem(k);var d=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}})()`;
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: The pre-hydration theme bootstrap contains only a JSON-escaped storage key and static code.
   return <script dangerouslySetInnerHTML={{ __html: script }} />;
 }
 
@@ -193,7 +198,7 @@ export function DocsArticle({ children, className }: DocsArticleProps) {
 export function DocsPageHeader({ page }: { page: DocsPageData }) {
   return (
     <header className="sibl-page-header">
-      {page.eyebrow ?? page.section ? (
+      {(page.eyebrow ?? page.section) ? (
         <p className="sibl-eyebrow">{page.eyebrow ?? page.section}</p>
       ) : null}
       <h1>{page.title}</h1>
@@ -261,5 +266,5 @@ export function DocsPage({
 
 export { Callout, type CalloutProps } from "./callout.js";
 export { SearchButton, type SearchButtonProps } from "./search-ui.js";
-export { ThemeToggle, useDocsTheme, type Theme } from "./theme.js";
+export { type Theme, ThemeToggle, useDocsTheme } from "./theme.js";
 export { DocsTableOfContents } from "./toc.js";

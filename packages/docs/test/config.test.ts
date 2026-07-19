@@ -82,9 +82,7 @@ describe("defineDocs", () => {
         navigation: [
           {
             label: "Guide",
-            items: [
-              { title: "Private", slug: "", source: "../private.mdx" },
-            ],
+            items: [{ title: "Private", slug: "", source: "../private.mdx" }],
           },
         ],
       }),
@@ -96,9 +94,7 @@ describe("defineDocs", () => {
         navigation: [
           {
             label: "Guide",
-            items: [
-              { title: "Text", slug: "", source: "content/index.txt" },
-            ],
+            items: [{ title: "Text", slug: "", source: "content/index.txt" }],
           },
         ],
       }),
