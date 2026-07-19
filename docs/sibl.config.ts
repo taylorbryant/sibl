@@ -5,7 +5,7 @@ export default defineDocs({
   description:
     "Explicit, Next-native documentation primitives for people and agents.",
   basePath: "/docs",
-  siteUrl: "https://use-sibl.dev",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
   navigation: [
     {
       label: "Getting started",
@@ -63,6 +63,6 @@ export default defineDocs({
     accent: "#6658d3",
     accentDark: "#9b91ff",
     mark: "§",
-    storageKey: "sibl-example-theme",
+    storageKey: "sibl-docs-theme",
   },
 });

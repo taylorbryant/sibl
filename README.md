@@ -8,7 +8,7 @@ The package is intentionally a library rather than a framework. There is no wrap
 
 This repository contains the `0.1.0` release candidate. It has not been published to npm yet.
 
-## Run the example
+## Run the Sibl docs
 
 ```bash
 bun install
@@ -16,6 +16,13 @@ bun run dev
 ```
 
 Open [http://localhost:3000/docs](http://localhost:3000/docs).
+
+The documentation site in `docs/` is the canonical integration example: it
+uses the local `sibl` workspace package to render and publish Sibl's own MDX
+documentation.
+
+Set `NEXT_PUBLIC_SITE_URL` to the deployed origin to emit absolute canonical
+links in the sitemap and agent-readable outputs.
 
 ## Install
 
