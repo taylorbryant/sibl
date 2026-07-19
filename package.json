@@ -8,17 +8,18 @@
     "docs"
   ],
   "scripts": {
-    "build": "bun run build:package && bun run build:docs",
-    "build:docs": "bun run --cwd docs build",
-    "build:package": "bun run --cwd packages/sibl build",
-    "dev": "bun run build:package && bun run --cwd docs dev",
-    "test": "bun test",
-    "typecheck": "bun run build:package && bun run --cwd packages/sibl typecheck && bun run --cwd docs typecheck",
-    "check": "bun run typecheck && bun run test && bun run build"
+    "build": "turbo run build",
+    "build:docs": "turbo run build --filter=@sibl/site",
+    "build:package": "turbo run build --filter=@sibl/docs",
+    "dev": "turbo run dev --filter=@sibl/site",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "check": "turbo run build typecheck test"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^26.1.1",
+    "turbo": "^2.10.5",
     "typescript": "6.0.3"
   }
 }

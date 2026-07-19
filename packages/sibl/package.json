@@ -78,6 +78,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && cp src/styles.css dist/styles.css",
     "prepublishOnly": "bun run build && bun run typecheck && bun test",
+    "test": "bun test",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

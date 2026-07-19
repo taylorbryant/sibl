@@ -194,10 +194,11 @@ Use route handlers when the Next deployment can generate them, or `writeOutputs`
 
 ## Development
 
+The root scripts use Turborepo to order workspace dependencies and cache task
+outputs locally.
+
 ```bash
-bun run typecheck
-bun test
-bun run build
+bun run check
 ```
 
 ## License
