@@ -1,4 +1,4 @@
-import { defineDocs } from "@taylorbryant/sibl";
+import { defineDocs } from "@sibl/docs";
 
 export default defineDocs({
   title: "Sibl",

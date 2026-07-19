@@ -28,11 +28,11 @@ async function fixture() {
   await mkdir(contentDir, { recursive: true });
   await writeFile(
     path.join(contentDir, "index.mdx"),
-    `import { Callout } from "@taylorbryant/sibl/react";\n\n# Welcome\n\nWelcome to **Sibl**.\n\n<Callout>One source.</Callout>\n\n## First section\n\nHello.\n`,
+    `import { Callout } from "@sibl/docs/react";\n\n# Welcome\n\nWelcome to **Sibl**.\n\n<Callout>One source.</Callout>\n\n## First section\n\nHello.\n`,
   );
   await writeFile(
     path.join(contentDir, "install.mdx"),
-    `# Installation\n\nInstall with \`bun add @taylorbryant/sibl\`.\n\n## Repeat\n\nOne.\n\n## Repeat\n\nTwo.\n`,
+    `# Installation\n\nInstall with \`bun add @sibl/docs\`.\n\n## Repeat\n\nOne.\n\n## Repeat\n\nTwo.\n`,
   );
 
   const config = defineDocs({
@@ -93,7 +93,7 @@ describe("createDocs", () => {
     );
 
     const fullText = await docs.getLlmsFullText();
-    expect(fullText).toContain("Install with `bun add @taylorbryant/sibl`");
+    expect(fullText).toContain("Install with `bun add @sibl/docs`");
     expect(fullText).not.toContain("import { Callout }");
 
     const index = await docs.getSearchIndex();

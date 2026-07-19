@@ -1,5 +1,5 @@
 import type { MDXComponents } from "mdx/types";
-import { createMdxComponents } from "@taylorbryant/sibl/mdx";
+import { createMdxComponents } from "@sibl/docs/mdx";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return createMdxComponents(components);

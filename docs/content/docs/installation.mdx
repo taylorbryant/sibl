@@ -3,13 +3,13 @@ Sibl enters an existing App Router project as an ordinary dependency.
 ## Install the packages
 
 ```bash
-bun add @taylorbryant/sibl @next/mdx @mdx-js/loader @mdx-js/react
+bun add @sibl/docs @next/mdx @mdx-js/loader @mdx-js/react
 ```
 
 Import the default stylesheet once from the root layout:
 
 ```tsx
-import "@taylorbryant/sibl/styles.css";
+import "@sibl/docs/styles.css";
 ```
 
 ## Configure MDX
@@ -18,7 +18,7 @@ Keep the Next integration in `next.config.ts`:
 
 ```ts
 import createMDX from "@next/mdx";
-import { createMdxOptions } from "@taylorbryant/sibl/mdx-config";
+import { createMdxOptions } from "@sibl/docs/mdx-config";
 
 const withMDX = createMDX({ options: createMdxOptions() });
 
@@ -31,7 +31,7 @@ Add the standard `mdx-components.tsx` provider:
 
 ```tsx
 import type { MDXComponents } from "mdx/types";
-import { createMdxComponents } from "@taylorbryant/sibl/mdx";
+import { createMdxComponents } from "@sibl/docs/mdx";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return createMdxComponents(components);
@@ -43,7 +43,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
 Each page needs a slug and source path:
 
 ```ts
-import { defineDocs } from "@taylorbryant/sibl";
+import { defineDocs } from "@sibl/docs";
 
 export default defineDocs({
   title: "Acme",
@@ -62,7 +62,7 @@ export default defineDocs({
 ## Connect the source
 
 ```ts
-import { createDocs } from "@taylorbryant/sibl/server";
+import { createDocs } from "@sibl/docs/server";
 import config from "./sibl.config";
 
 export const docs = createDocs(config, { rootDir: process.cwd() });

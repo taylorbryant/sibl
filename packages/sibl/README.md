@@ -7,5 +7,5 @@ Sibl combines an explicit typed manifest with Next-compiled MDX, a responsive do
 This package is a pre-release `0.1.0` candidate. The repository contains a complete App Router integration and API documentation.
 
 ```bash
-bun add @taylorbryant/sibl @next/mdx @mdx-js/loader @mdx-js/react
+bun add @sibl/docs @next/mdx @mdx-js/loader @mdx-js/react
 ```

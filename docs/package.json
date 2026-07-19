@@ -1,5 +1,5 @@
 {
-  "name": "@sibl/docs",
+  "name": "@sibl/site",
   "private": true,
   "version": "0.1.0",
   "scripts": {
@@ -13,7 +13,7 @@
     "next": "16.2.10",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "@taylorbryant/sibl": "workspace:*"
+    "@sibl/docs": "workspace:*"
   },
   "devDependencies": {
     "@mdx-js/loader": "^3.1.0",

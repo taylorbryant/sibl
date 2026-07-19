@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DocsPage } from "@taylorbryant/sibl/react";
+import { DocsPage } from "@sibl/docs/react";
 import { docsContent } from "@/lib/content";
 import { docs } from "@/lib/docs";
 
