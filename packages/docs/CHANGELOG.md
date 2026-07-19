@@ -1,5 +1,15 @@
 # @sibl/docs
 
+## 0.4.0
+
+### Minor Changes
+
+- 92a2583: Remove `theme.mark` from the config API. Sibl now keeps its built-in `§` mark as an internal fallback, while applications replace the complete default identity through the `brand` React slot.
+
+### Patch Changes
+
+- 92a2583: Refine the search input focus state to use an accent underline and icon instead of outlining the complete dialog header.
+
 ## 0.3.0
 
 ### Minor Changes
