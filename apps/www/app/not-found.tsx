@@ -10,7 +10,7 @@ export default function NotFound() {
       }}
     >
       <div>
-        <p style={{ color: "#6658d3", fontWeight: 700 }}>404</p>
+        <p style={{ color: "#4f46e5", fontWeight: 700 }}>404</p>
         <h1>That page is not in the manifest.</h1>
         <a href="/docs">Return to the documentation</a>
       </div>

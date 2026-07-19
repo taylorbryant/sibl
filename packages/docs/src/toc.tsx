@@ -9,7 +9,7 @@ interface TocHeading {
   text: string;
 }
 
-export function DocsTableOfContents({ minimumHeadings = 2 }) {
+export function DocsTableOfContents({ minimumHeadings = 3 }) {
   const pathname = usePathname();
   const [headings, setHeadings] = useState<TocHeading[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -51,6 +51,12 @@ export function DocsTableOfContents({ minimumHeadings = 2 }) {
     };
 
     computeActive();
+
+    const observer = new IntersectionObserver(() => computeActive(), {
+      rootMargin: "-120px 0px -60% 0px",
+    });
+    for (const element of elements) observer.observe(element);
+
     let frame = 0;
     const onScroll = () => {
       if (frame) return;
@@ -61,6 +67,7 @@ export function DocsTableOfContents({ minimumHeadings = 2 }) {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
+      observer.disconnect();
       window.removeEventListener("scroll", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };

@@ -55,7 +55,9 @@ function Highlight({ text, terms }: { text: string; terms: string[] }) {
         const start = offset;
         offset += part.length;
         return index % 2 === 1 ? (
-          <mark key={`${start}-${part}`}>{part}</mark>
+          <mark className="sibl-search-highlight" key={`${start}-${part}`}>
+            {part}
+          </mark>
         ) : (
           part
         );
@@ -74,9 +76,15 @@ interface SearchDialogProps {
   indexUrl: string;
   onClose: () => void;
   placeholder: string;
+  portalRoot: Element;
 }
 
-function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
+function SearchDialog({
+  indexUrl,
+  onClose,
+  placeholder,
+  portalRoot,
+}: SearchDialogProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -158,7 +166,7 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
         onKeyDown={onKeyDown}
       >
         <div className="sibl-search-field">
-          <span aria-hidden="true">⌕</span>
+          <MagnifierIcon className="sibl-search-field-icon" />
           <input
             ref={inputRef}
             value={query}
@@ -176,10 +184,14 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
             aria-expanded={results.length > 0}
             aria-label="Search documentation"
             autoComplete="off"
+            autoCapitalize="off"
+            autoCorrect="off"
+            inputMode="search"
+            name="documentation-search"
             placeholder={placeholder}
             role="combobox"
             spellCheck={false}
-            type="search"
+            type="text"
           />
           <button type="button" onClick={onClose} aria-label="Close search">
             esc
@@ -216,6 +228,7 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
                   type="button"
                   className="sibl-search-result"
                   onClick={() => go(result)}
+                  onMouseDown={(event) => event.preventDefault()}
                   onMouseMove={() => setActiveIndex(index)}
                 >
                   <span className="sibl-search-result-title">
@@ -242,16 +255,35 @@ function SearchDialog({ indexUrl, onClose, placeholder }: SearchDialogProps) {
         </div>
       </div>
     </div>,
-    document.body,
+    portalRoot,
+  );
+}
+
+function MagnifierIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.5"
+      viewBox="0 0 16 16"
+    >
+      <circle cx="7" cy="7" r="4.5" />
+      <path d="m10.5 10.5 3 3" />
+    </svg>
   );
 }
 
 export interface SearchButtonProps {
+  className?: string;
   indexUrl: string;
   placeholder?: string;
 }
 
 export function SearchButton({
+  className,
   indexUrl,
   placeholder = "Search documentation…",
 }: SearchButtonProps) {
@@ -263,6 +295,10 @@ export function SearchButton({
     setModifier(/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl");
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        const trigger = Array.from(
+          document.querySelectorAll<HTMLElement>("[data-sibl-search-trigger]"),
+        ).find((element) => element.getClientRects().length > 0);
+        if (trigger !== buttonRef.current) return;
         event.preventDefault();
         setOpen((value) => !value);
       }
@@ -280,14 +316,17 @@ export function SearchButton({
     <>
       <button
         ref={buttonRef}
-        className="sibl-search-button"
+        className={
+          className ? `sibl-search-button ${className}` : "sibl-search-button"
+        }
+        data-sibl-search-trigger
         type="button"
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
       >
-        <span aria-hidden="true">⌕</span>
-        <span>Search</span>
+        <MagnifierIcon className="sibl-search-button-icon" />
+        <span className="sibl-search-button-label">Search</span>
         <kbd>{modifier} K</kbd>
       </button>
       {open ? (
@@ -295,6 +334,7 @@ export function SearchButton({
           indexUrl={indexUrl}
           onClose={close}
           placeholder={placeholder}
+          portalRoot={buttonRef.current?.closest(".sibl-root") ?? document.body}
         />
       ) : null}
     </>

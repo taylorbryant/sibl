@@ -97,8 +97,8 @@ export const docsConfigSchema = z
       .default({ enabled: true, placeholder: "Search documentation…" }),
     theme: z
       .object({
-        accent: z.string().regex(hexColorPattern).default("#6658d3"),
-        accentDark: z.string().regex(hexColorPattern).default("#9b91ff"),
+        accent: z.string().regex(hexColorPattern).default("#4f46e5"),
+        accentDark: z.string().regex(hexColorPattern).default("#bd93f9"),
         mark: z.string().trim().min(1).max(3).default("§"),
         storageKey: z
           .string()
@@ -111,8 +111,8 @@ export const docsConfigSchema = z
       })
       .strict()
       .default({
-        accent: "#6658d3",
-        accentDark: "#9b91ff",
+        accent: "#4f46e5",
+        accentDark: "#bd93f9",
         mark: "§",
         storageKey: "sibl-theme",
       }),

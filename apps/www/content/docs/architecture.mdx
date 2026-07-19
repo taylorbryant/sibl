@@ -1,3 +1,5 @@
+# Architecture
+
 Sibl separates the documentation problem into three layers. Applications can adopt the complete default or compose the individual pieces themselves.
 
 ## The typed manifest
@@ -24,13 +26,13 @@ Sibl reads the raw source only when validating content or producing search and a
 
 ## The composable React surface
 
-`DocsPage` combines the default pieces for the common case. The same page can be assembled directly from `DocsLayout`, `DocsArticle`, `DocsPageHeader`, and `DocsPagination`.
+`DocsPage` combines the default Sibl shell with an application-owned MDX title. `DocsPageWithHeader` is an explicit alternative for sites that want to derive the title and description from the manifest. The same page can also be assembled directly from `DocsLayout`, `DocsArticle`, `DocsPageHeader`, and `DocsPagination`.
 
-The shell accepts application-owned branding, header actions, sidebar metadata, and footer content. `createMdxComponents` also accepts overrides for every rendered element.
+The shell accepts application-owned branding, actions, sidebar metadata, and footer content. Product palettes can keep using semantic CSS variables such as `--color-bg`, `--color-accent`, and `--color-ink`. `createMdxComponents` also accepts overrides for every rendered element.
 
 ## Small client islands
 
-The layout remains a Server Component. JavaScript is limited to behavior that needs the browser: keyboard search, theme persistence, table-of-contents tracking, and code copying.
+MDX content remains server-rendered. The shell uses small client islands only for behavior that needs the browser: mobile navigation, keyboard search, theme persistence, table-of-contents tracking, and code copying.
 
 ## The framework boundary
 

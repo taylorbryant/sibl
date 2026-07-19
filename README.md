@@ -1,12 +1,12 @@
 # Sibl
 
-Sibl is a composable, Next-native documentation library extracted from the shared architecture of the Tenchi and Beignet documentation sites. Next.js compiles and routes the MDX; Sibl supplies the typed information architecture, documentation shell, MDX components, search, themes, and human- and agent-readable outputs.
+Sibl is a composable, Next-native documentation library built from a shared production documentation architecture. Next.js compiles and routes the MDX; Sibl supplies the typed information architecture, documentation shell, MDX components, search, themes, and human- and agent-readable outputs.
 
 The package is intentionally a library rather than a framework. There is no wrapper around `next dev`, no generated application, and no private content runtime.
 
 ## Status
 
-This repository contains the `0.1.0` release candidate. It has not been published to npm yet.
+The published package is moving toward `0.2.0`, which refines the default visual shell around the production design it was extracted from.
 
 ## Run the Sibl docs
 
@@ -168,7 +168,11 @@ export default async function Page({ params }) {
 }
 ```
 
-`DocsPage` is only a convenience composition. Applications can independently use `DocsLayout`, `DocsArticle`, `DocsPageHeader`, `DocsPagination`, `DocsNavigation`, and `DocsTableOfContents`. The layout accepts custom brand, header action, sidebar footer, and footer slots.
+`DocsPage` is only a convenience composition and expects the MDX source to own its `# Title`. `DocsPageWithHeader` is the explicit manifest-rendered heading variant. Applications can independently use `DocsLayout`, `DocsArticle`, `DocsPageHeader`, `DocsPagination`, `DocsNavigation`, and `DocsTableOfContents`. The layout accepts custom brand, action, sidebar footer, and footer slots.
+
+### Preserve an existing product theme
+
+Sibl's stylesheet consumes semantic theme variables: `--color-bg`, `--color-surface`, `--color-surface-muted`, `--color-ink`, `--color-ink-light`, `--color-ink-muted`, `--color-border`, `--color-accent-strong`, and `--color-code-bg`. Existing values continue to control the shell after migration. The manifest supplies the light and dark accent colors, while the `brand`, `sidebarFooter`, and `footer` slots keep product-specific identity in the application.
 
 ## Outputs
 
@@ -201,6 +205,25 @@ outputs locally.
 bun run check
 bun run format
 ```
+
+Public package changes use Changesets. Add a release note with the
+implementation:
+
+```bash
+bun run changeset
+```
+
+To prepare and publish a local release from a clean `main` branch:
+
+```bash
+bun run version-packages
+# Review and commit the version and changelog changes.
+bun run release
+git push --follow-tags
+```
+
+The first pending changeset prepares `0.2.0`. See
+[`.changeset/README.md`](.changeset/README.md) for the complete workflow.
 
 ## License
 

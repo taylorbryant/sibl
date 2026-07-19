@@ -30,7 +30,8 @@ describe("defineDocs", () => {
 
     expect(config.basePath).toBe("/docs");
     expect(config.theme.mark).toBe("§");
-    expect(config.theme.accentDark).toBe("#9b91ff");
+    expect(config.theme.accent).toBe("#4f46e5");
+    expect(config.theme.accentDark).toBe("#bd93f9");
     expect(config.outputs.searchIndex).toBe("/search-index.json");
     expect(config.search.enabled).toBe(true);
   });

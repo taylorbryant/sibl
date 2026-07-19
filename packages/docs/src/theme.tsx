@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 
 export type Theme = "light" | "dark" | "system";
@@ -69,10 +70,60 @@ export function useDocsTheme(storageKey: string) {
   return { setTheme, theme };
 }
 
-const themeOptions: Array<{ label: string; value: Theme; symbol: string }> = [
-  { label: "Light theme", value: "light", symbol: "☀" },
-  { label: "System theme", value: "system", symbol: "◐" },
-  { label: "Dark theme", value: "dark", symbol: "☾" },
+const themeOptions: Array<{ icon: ReactNode; label: string; value: Theme }> = [
+  {
+    value: "light",
+    label: "Light theme",
+    icon: (
+      <svg
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+      </svg>
+    ),
+  },
+  {
+    value: "system",
+    label: "System theme",
+    icon: (
+      <svg
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <rect height="13" rx="2" width="18" x="3" y="4" />
+        <path d="M8 21h8m-4-4v4" />
+      </svg>
+    ),
+  },
+  {
+    value: "dark",
+    label: "Dark theme",
+    icon: (
+      <svg
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+      </svg>
+    ),
+  },
 ];
 
 export function ThemeToggle({ storageKey }: { storageKey: string }) {
@@ -90,7 +141,7 @@ export function ThemeToggle({ storageKey }: { storageKey: string }) {
           onClick={() => setTheme(option.value)}
           title={option.label}
         >
-          <span aria-hidden="true">{option.symbol}</span>
+          {option.icon}
         </button>
       ))}
     </fieldset>

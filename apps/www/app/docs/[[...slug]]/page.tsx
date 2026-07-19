@@ -43,8 +43,14 @@ export default async function DocumentationPage({
     <DocsPage
       config={docs.config}
       page={page}
-      sidebarFooter={<span>sibl v0.1.0</span>}
-      footer={<span>Built with Sibl and ordinary Next.js routes.</span>}
+      footer={
+        <>
+          <span>
+            Created by <a href="https://taylor.page">Taylor Bryant</a>
+          </span>
+          <a href="/llms.txt">llms.txt</a>
+        </>
+      }
     >
       <Content />
     </DocsPage>

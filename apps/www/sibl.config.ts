@@ -58,10 +58,13 @@ export default defineDocs({
       ],
     },
   ],
-  links: [{ label: "llms.txt", href: "/llms.txt" }],
+  links: [
+    { label: "GitHub", href: "https://github.com/taylorbryant/sibl" },
+    { label: "npm", href: "https://www.npmjs.com/package/@sibl/docs" },
+  ],
   theme: {
-    accent: "#6658d3",
-    accentDark: "#9b91ff",
+    accent: "#4f46e5",
+    accentDark: "#bd93f9",
     mark: "§",
     storageKey: "sibl-docs-theme",
   },

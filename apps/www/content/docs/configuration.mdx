@@ -1,3 +1,5 @@
+# Configuration
+
 The config is both a runtime-validated object and the source of the public navigation hierarchy.
 
 ## Project fields
@@ -8,7 +10,7 @@ The config is both a runtime-validated object and the source of the public navig
 | `description` | required | Site and agent-output summary |
 | `basePath` | `/docs` | Route prefix for documentation |
 | `siteUrl` | — | Optional origin for canonical agent links |
-| `links` | `[]` | Project links shown in the header |
+| `links` | `[]` | Project links shown beside the sidebar controls |
 | `outputs` | standard paths | Locations for search and agent outputs |
 | `search` | enabled | Search visibility and placeholder |
 | `theme` | Sibl defaults | Light/dark accents, mark, and storage key |
@@ -53,4 +55,4 @@ UI customization is passed as React props rather than stored in the serializable
 </DocsPage>
 ```
 
-Applications that render their own MDX title can set `showPageHeader={false}`.
+`DocsPage` expects the MDX file to own its `# Title`. Use the explicit `DocsPageWithHeader` composition when the manifest should render the page heading instead.
