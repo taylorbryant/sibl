@@ -16,7 +16,7 @@
     "format": "biome format --write .",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "release": "turbo run build typecheck test && NPM_CONFIG_PROVENANCE=false changeset publish",
+    "release": "turbo run build typecheck test && changeset publish",
     "release:status": "changeset status --verbose",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",

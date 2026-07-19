@@ -35,10 +35,7 @@ git push --follow-tags
 ```
 
 The release command verifies the workspaces, publishes every unpublished
-public package, and creates the corresponding Git tag. It disables npm
-provenance for the local publish because provenance requires a supported CI
-environment. The package keeps provenance enabled in `publishConfig` for a
-future automated release workflow.
-
-The first pending minor changeset prepares `@sibl/docs` `0.2.0`. Running
-`bun run version-packages` will generate that version and its changelog.
+public package, and creates the corresponding Git tag. Local publishing does
+not request provenance because provenance requires a supported CI environment.
+If the package moves to npm trusted publishing later, npm will generate
+provenance automatically in the supported CI workflow.

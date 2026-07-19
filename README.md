@@ -222,8 +222,7 @@ bun run release
 git push --follow-tags
 ```
 
-The first pending changeset prepares `0.2.0`. See
-[`.changeset/README.md`](.changeset/README.md) for the complete workflow.
+See [`.changeset/README.md`](.changeset/README.md) for the complete workflow.
 
 ## License
 
