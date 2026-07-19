@@ -9,6 +9,8 @@ import { SearchButton } from "./search-ui.js";
 import { ThemeToggle } from "./theme.js";
 import { DocsTableOfContents } from "./toc.js";
 
+const defaultMark = "§";
+
 function classNames(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
@@ -151,7 +153,7 @@ export function DocsLayout({
   const brandContent = brand ?? (
     <>
       <span aria-hidden="true" className="sibl-mark">
-        {config.theme.mark}
+        {defaultMark}
       </span>
       <span>{config.title}</span>
     </>

@@ -8,7 +8,6 @@ const routePathPattern = /^\/[a-z0-9./_-]+$/;
 const defaultTheme = {
   accent: { light: "#4f46e5", dark: "#bd93f9" },
   background: { light: "#ffffff", dark: "#282a36" },
-  mark: "§",
   storageKey: "sibl-theme",
 };
 
@@ -45,7 +44,6 @@ const themeSchema = z
   .object({
     accent: themeColors.default(() => ({ ...defaultTheme.accent })),
     background: themeColors.default(() => ({ ...defaultTheme.background })),
-    mark: z.string().trim().min(1).max(3).default(defaultTheme.mark),
     storageKey: z
       .string()
       .trim()
@@ -145,7 +143,6 @@ export const docsConfigSchema = z
     theme: themeSchema.default(() => ({
       accent: { ...defaultTheme.accent },
       background: { ...defaultTheme.background },
-      mark: defaultTheme.mark,
       storageKey: defaultTheme.storageKey,
     })),
   })

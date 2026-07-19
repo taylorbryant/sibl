@@ -59,8 +59,33 @@ describe("documentation shell", () => {
     expect(markup).toContain('class="sibl-main"');
     expect(markup).toContain("--sibl-background-light:#ffffff");
     expect(markup).toContain("--sibl-background-dark:#282a36");
+    expect(markup).toContain(
+      '<span aria-hidden="true" class="sibl-mark">§</span>',
+    );
     expect(markup).toContain("MDX-owned title");
     expect(markup).not.toContain('class="sibl-page-header"');
+  });
+
+  test("replaces the default mark and title with custom branding", () => {
+    const markup = renderToStaticMarkup(
+      <DocsPage
+        brand={
+          <svg aria-labelledby="acme-logo-title" role="img" viewBox="0 0 24 24">
+            <title id="acme-logo-title">Acme</title>
+            <path d="M12 2 22 22H2Z" />
+          </svg>
+        }
+        config={config}
+        page={page}
+        {...behaviorProps}
+      >
+        <h1>Overview</h1>
+      </DocsPage>,
+    );
+
+    expect(markup).toContain('<title id="acme-logo-title">Acme</title>');
+    expect(markup).not.toContain('class="sibl-mark"');
+    expect(markup).not.toContain("<span>Example</span>");
   });
 
   test("bootstraps the browser chrome color with the stored theme", () => {

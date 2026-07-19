@@ -14,7 +14,7 @@ The config is both a runtime-validated object and the source of the public navig
 | `links` | `[]` | Project links shown beside the sidebar controls |
 | `outputs` | standard paths | Locations for search and agent outputs |
 | `search` | enabled | Search visibility and placeholder |
-| `theme` | Sibl defaults | Light/dark backgrounds and accents, mark, and storage key |
+| `theme` | Sibl defaults | Light/dark backgrounds and accents, plus the storage key |
 
 ## Navigation sections
 
@@ -66,7 +66,6 @@ Light and dark colors share the same shape throughout the config and React API:
 theme: {
   accent: { light: "#4f46e5", dark: "#bd93f9" },
   background: { light: "#ffffff", dark: "#282a36" },
-  mark: "§",
   storageKey: "acme-docs-theme",
 }
 ```
@@ -114,5 +113,7 @@ UI customization is passed as React props rather than stored in the serializable
   <Content />
 </DocsPage>
 ```
+
+Without a `brand` prop, Sibl displays its built-in `§` mark beside the configured title. Passing `brand` replaces both with any React node, including a product logo or wordmark. The shell supplies the link back to `docsPath`, so the custom node does not need to render its own anchor.
 
 `DocsPage` expects the MDX file to own its `# Title`. Use the explicit `DocsPageWithHeader` composition when the manifest should render the page heading instead.

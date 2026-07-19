@@ -954,8 +954,8 @@ body:has(> .sibl-root) {
 }
 
 .sibl-search-field:has(input:focus-visible) {
-  box-shadow: inset 0 0 0 2px
-    color-mix(in srgb, var(--sibl-accent) 60%, transparent);
+  border-bottom-color: var(--sibl-accent);
+  box-shadow: inset 0 -1px 0 var(--sibl-accent);
 }
 
 .sibl-search-field-icon {
@@ -963,6 +963,10 @@ body:has(> .sibl-root) {
   height: 16px;
   flex: none;
   color: var(--sibl-ink-muted);
+}
+
+.sibl-search-field:has(input:focus-visible) .sibl-search-field-icon {
+  color: var(--sibl-accent);
 }
 
 .sibl-search-field input {

@@ -31,7 +31,6 @@ describe("defineDocs", () => {
 
     expect(config.docsPath).toBe("/docs");
     expect(config.appBasePath).toBe("");
-    expect(config.theme.mark).toBe("§");
     expect(config.theme.accent).toEqual({
       light: "#4f46e5",
       dark: "#bd93f9",
@@ -156,7 +155,7 @@ describe("defineDocs", () => {
     );
   });
 
-  test("rejects removed path fields and flat theme colors", () => {
+  test("rejects removed fields and flat theme colors", () => {
     expect(
       docsConfigSchema.safeParse({ ...input, basePath: "/guide" }).success,
     ).toBe(false);
@@ -167,6 +166,12 @@ describe("defineDocs", () => {
           accent: "#112233",
           background: "#fefefe",
         },
+      }).success,
+    ).toBe(false);
+    expect(
+      docsConfigSchema.safeParse({
+        ...input,
+        theme: { mark: "E" },
       }).success,
     ).toBe(false);
   });
