@@ -5,6 +5,15 @@
   "author": "Taylor Bryant",
   "type": "module",
   "license": "MIT",
+  "homepage": "https://github.com/taylorbryant/sibl#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taylorbryant/sibl.git",
+    "directory": "packages/sibl"
+  },
+  "bugs": {
+    "url": "https://github.com/taylorbryant/sibl/issues"
+  },
   "keywords": [
     "documentation",
     "docs",
