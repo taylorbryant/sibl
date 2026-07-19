@@ -14,11 +14,11 @@ export function createMdxOptions(
   options: CreateMdxOptions = {},
 ): MdxProcessorOptions {
   return {
-    remarkPlugins: ["sibl/remark-gfm"],
+    remarkPlugins: ["@taylorbryant/sibl/remark-gfm"],
     rehypePlugins: [
-      "sibl/rehype-slug",
+      "@taylorbryant/sibl/rehype-slug",
       [
-        "sibl/rehype-shiki",
+        "@taylorbryant/sibl/rehype-shiki",
         {
           addLanguageClass: true,
           themes: options.themes ?? {

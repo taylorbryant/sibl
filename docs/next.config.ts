@@ -1,6 +1,6 @@
 import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
-import { createMdxOptions } from "sibl/mdx-config";
+import { createMdxOptions } from "@taylorbryant/sibl/mdx-config";
 
 const withMDX = createMDX({
   options: createMdxOptions(),
@@ -8,7 +8,7 @@ const withMDX = createMDX({
 
 const nextConfig: NextConfig = {
   pageExtensions: ["ts", "tsx", "md", "mdx"],
-  serverExternalPackages: ["sibl"],
+  serverExternalPackages: ["@taylorbryant/sibl"],
 };
 
 export default withMDX(nextConfig);

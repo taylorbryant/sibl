@@ -18,8 +18,8 @@ bun run dev
 Open [http://localhost:3000/docs](http://localhost:3000/docs).
 
 The documentation site in `docs/` is the canonical integration example: it
-uses the local `sibl` workspace package to render and publish Sibl's own MDX
-documentation.
+uses the local `@taylorbryant/sibl` workspace package to render and publish
+Sibl's own MDX documentation.
 
 Set `NEXT_PUBLIC_SITE_URL` to the deployed origin to emit absolute canonical
 links in the sitemap and agent-readable outputs.
@@ -27,14 +27,14 @@ links in the sitemap and agent-readable outputs.
 ## Install
 
 ```bash
-bun add sibl @next/mdx @mdx-js/loader @mdx-js/react
+bun add @taylorbryant/sibl @next/mdx @mdx-js/loader @mdx-js/react
 ```
 
 Import the visual system and pre-paint theme bootstrap once from your root layout:
 
 ```tsx
-import { DocsThemeScript } from "sibl/react";
-import "sibl/styles.css";
+import { DocsThemeScript } from "@taylorbryant/sibl/react";
+import "@taylorbryant/sibl/styles.css";
 import config from "@/sibl.config";
 
 export default function RootLayout({ children }) {
@@ -59,7 +59,7 @@ Sibl exposes serializable MDX options with GFM, stable heading IDs, and dual-the
 // next.config.ts
 import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
-import { createMdxOptions } from "sibl/mdx-config";
+import { createMdxOptions } from "@taylorbryant/sibl/mdx-config";
 
 const withMDX = createMDX({ options: createMdxOptions() });
 
@@ -75,7 +75,7 @@ Connect Sibl's default MDX elements through Next's ordinary provider file:
 ```tsx
 // mdx-components.tsx
 import type { MDXComponents } from "mdx/types";
-import { createMdxComponents } from "sibl/mdx";
+import { createMdxComponents } from "@taylorbryant/sibl/mdx";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return createMdxComponents(components);
@@ -90,7 +90,7 @@ Every public page maps to an explicit source file. The manifest controls navigat
 
 ```ts
 // sibl.config.ts
-import { defineDocs } from "sibl";
+import { defineDocs } from "@taylorbryant/sibl";
 
 export default defineDocs({
   title: "Acme",
@@ -121,7 +121,7 @@ Create the server-side documentation model:
 
 ```ts
 // lib/docs.ts
-import { createDocs } from "sibl/server";
+import { createDocs } from "@taylorbryant/sibl/server";
 import config from "@/sibl.config";
 
 export const docs = createDocs(config, { rootDir: process.cwd() });
@@ -145,7 +145,7 @@ export const content = {
 ```tsx
 // app/docs/[[...slug]]/page.tsx
 import { notFound } from "next/navigation";
-import { DocsPage } from "sibl/react";
+import { DocsPage } from "@taylorbryant/sibl/react";
 import { content } from "@/lib/content";
 import { docs } from "@/lib/docs";
 
@@ -185,12 +185,12 @@ Use route handlers when the Next deployment can generate them, or `writeOutputs`
 
 ## Package exports
 
-- `sibl` — configuration, navigation, and search primitives
-- `sibl/server` — source validation and generated outputs
-- `sibl/react` — composable documentation UI
-- `sibl/mdx` — default MDX components and `Callout`
-- `sibl/mdx-config` — serializable Next MDX compiler options
-- `sibl/styles.css` — default responsive light/dark visual system
+- `@taylorbryant/sibl` — configuration, navigation, and search primitives
+- `@taylorbryant/sibl/server` — source validation and generated outputs
+- `@taylorbryant/sibl/react` — composable documentation UI
+- `@taylorbryant/sibl/mdx` — default MDX components and `Callout`
+- `@taylorbryant/sibl/mdx-config` — serializable Next MDX compiler options
+- `@taylorbryant/sibl/styles.css` — default responsive light/dark visual system
 
 ## Development
 

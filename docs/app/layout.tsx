@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
-import { DocsThemeScript } from "sibl/react";
-import "sibl/styles.css";
+import { DocsThemeScript } from "@taylorbryant/sibl/react";
+import "@taylorbryant/sibl/styles.css";
 import config from "@/sibl.config";
 import "./globals.css";
 

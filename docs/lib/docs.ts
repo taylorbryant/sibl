@@ -1,4 +1,4 @@
-import { createDocs } from "sibl/server";
+import { createDocs } from "@taylorbryant/sibl/server";
 import config from "@/sibl.config";
 
 export const docs = createDocs(config, {
