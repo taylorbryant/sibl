@@ -404,8 +404,32 @@ body:has(> .sibl-root) {
   line-height: 24px;
 }
 
-.sibl-heading-anchor {
-  color: inherit;
+.sibl-prose .sibl-heading-permalink {
+  display: inline-flex;
+  min-width: 24px;
+  min-height: 24px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  border-radius: 4px;
+  color: var(--sibl-ink-muted);
+  font-weight: 400;
+  opacity: 0;
+  text-decoration: none;
+  vertical-align: -0.08em;
+  transition:
+    color 150ms ease,
+    opacity 150ms ease;
+}
+
+.sibl-prose h2:hover > .sibl-heading-permalink,
+.sibl-prose h3:hover > .sibl-heading-permalink,
+.sibl-prose .sibl-heading-permalink:focus-visible {
+  opacity: 1;
+}
+
+.sibl-prose .sibl-heading-permalink:hover {
+  color: var(--sibl-accent);
   text-decoration: none;
 }
 
@@ -454,6 +478,12 @@ body:has(> .sibl-root) {
   text-decoration-color: var(--sibl-accent);
 }
 
+@media (hover: none) {
+  .sibl-prose .sibl-heading-permalink {
+    opacity: 0.6;
+  }
+}
+
 .sibl-prose blockquote {
   margin: 16px 0;
   border-left: 2px solid color-mix(in srgb, var(--sibl-accent) 30%, transparent);
@@ -480,14 +510,17 @@ body:has(> .sibl-root) {
 
 .sibl-code-block {
   position: relative;
+  overflow: hidden;
   margin-bottom: 24px;
+  border: 1px solid var(--sibl-border);
+  border-radius: 8px;
 }
 
 .sibl-code-block pre {
   overflow-x: auto;
   margin: 0;
-  border: 1px solid var(--sibl-border);
-  border-radius: 8px;
+  border: 0;
+  border-radius: 0;
   padding: 16px;
   font-family: var(
     --font-mono,
@@ -504,24 +537,24 @@ body:has(> .sibl-root) {
 }
 
 .sibl-code-actions {
-  position: absolute;
-  z-index: 10;
-  top: 10px;
-  right: 10px;
   display: flex;
+  min-height: 44px;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
+  border-bottom: 1px solid var(--sibl-border);
+  padding: 8px 12px;
 }
 
 .sibl-code-actions > span {
-  height: 28px;
-  color: var(--sibl-ink-muted);
-  font-size: 10px;
+  color: var(--sibl-ink-light);
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  line-height: 28px;
-  text-transform: uppercase;
-  transition: opacity 150ms ease;
+  line-height: 20px;
+}
+
+.dark .sibl-code-block .sibl-code-actions {
+  background-color: var(--shiki-dark-bg) !important;
 }
 
 .sibl-copy-button {
@@ -530,19 +563,20 @@ body:has(> .sibl-root) {
   height: 28px;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--sibl-border);
+  border: 1px solid transparent;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--sibl-bg) 70%, transparent);
+  background: transparent;
   padding: 0;
   color: var(--sibl-ink-muted);
-  opacity: 0;
   cursor: pointer;
-  backdrop-filter: blur(4px);
   transition:
     color 150ms ease,
     background-color 150ms ease,
-    border-color 150ms ease,
-    opacity 150ms ease;
+    border-color 150ms ease;
+}
+
+.sibl-code-actions .sibl-copy-button {
+  margin-left: auto;
 }
 
 .sibl-copy-button svg {
@@ -550,16 +584,8 @@ body:has(> .sibl-root) {
   height: 14px;
 }
 
-.sibl-code-block:hover .sibl-copy-button,
-.sibl-copy-button:focus-visible {
-  opacity: 1;
-}
-
-.sibl-code-block:hover .sibl-code-actions > span {
-  opacity: 0;
-}
-
 .sibl-copy-button:hover {
+  background: color-mix(in srgb, var(--sibl-ink) 6%, transparent);
   color: var(--sibl-ink);
 }
 

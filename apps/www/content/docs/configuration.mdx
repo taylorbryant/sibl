@@ -38,6 +38,21 @@ Each section has a label and one or more page entries. A page entry maps its pub
 
 Slugs use lowercase URL segments such as `guides/deployment`. The root page uses an empty slug. Source paths must stay inside the application root.
 
+## Code highlighting
+
+`createMdxOptions` uses `github-light` and `github-dark` by default. Pass any bundled Shiki theme names to choose a different pair:
+
+```ts
+const withMDX = createMDX({
+  options: createMdxOptions({
+    themes: {
+      light: "vitesse-light",
+      dark: "vitesse-dark",
+    },
+  }),
+});
+```
+
 ## Composition settings
 
 UI customization is passed as React props rather than stored in the serializable manifest:

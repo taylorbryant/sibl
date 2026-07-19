@@ -70,6 +70,19 @@ const nextConfig: NextConfig = {
 export default withMDX(nextConfig);
 ```
 
+Pass any bundled Shiki theme names to replace the defaults:
+
+```ts
+const withMDX = createMDX({
+  options: createMdxOptions({
+    themes: {
+      light: "vitesse-light",
+      dark: "vitesse-dark",
+    },
+  }),
+});
+```
+
 Connect Sibl's default MDX elements through Next's ordinary provider file:
 
 ```tsx
