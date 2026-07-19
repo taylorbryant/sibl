@@ -9,7 +9,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/taylorbryant/sibl.git",
-    "directory": "packages/sibl"
+    "directory": "packages/docs"
   },
   "bugs": {
     "url": "https://github.com/taylorbryant/sibl/issues"

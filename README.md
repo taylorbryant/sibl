@@ -17,7 +17,7 @@ bun run dev
 
 Open [http://localhost:3000/docs](http://localhost:3000/docs).
 
-The documentation site in `docs/` is the canonical integration example: it
+The documentation site in `apps/www/` is the canonical integration example: it
 uses the local `@sibl/docs` workspace package to render and publish
 Sibl's own MDX documentation.
 
