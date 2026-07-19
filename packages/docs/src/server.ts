@@ -2,12 +2,18 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import GithubSlugger from "github-slugger";
 import type { DocsConfig, NavigationSection } from "./config.js";
-import { cleanMdx, extractHeadings, stripMarkdown } from "./markdown.js";
+import {
+  cleanMdx,
+  extractHeadingIds,
+  extractHeadings,
+  stripMarkdown,
+} from "./markdown.js";
 import {
   findNavigationItem,
   flattenNavigation,
   normalizeSlug,
   pageHref,
+  publicHref,
 } from "./navigation.js";
 import type { SearchEntry } from "./search.js";
 
@@ -35,8 +41,15 @@ export class SiblContentError extends Error {
 }
 
 function absolutePageHref(config: DocsConfig, slug: string): string {
-  const href = pageHref(config, slug);
+  const href = publicHref(config, pageHref(config, slug));
   return config.siteUrl ? new URL(href, config.siteUrl).toString() : href;
+}
+
+function absolutePublicHref(config: DocsConfig, href: string): string {
+  const publicPath = publicHref(config, href);
+  return config.siteUrl
+    ? new URL(publicPath, config.siteUrl).toString()
+    : publicPath;
 }
 
 function descriptor(
@@ -125,6 +138,132 @@ function outputFilePath(outputDir: string, routePath: string): string {
   return path.join(outputDir, routePath.replace(/^\/+/, ""));
 }
 
+interface MarkdownLink {
+  href: string;
+  line: number;
+}
+
+function markdownLinks(source: string): MarkdownLink[] {
+  const links: MarkdownLink[] = [];
+  let inFence = false;
+
+  for (const [index, sourceLine] of source.split("\n").entries()) {
+    if (/^\s*(```|~~~)/.test(sourceLine)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+
+    const line = sourceLine.replace(/(`+)(.+?)\1/g, "");
+    const pattern =
+      /(?<!!)\[[^\]]*\]\(\s*<?([^\s)>]+)>?(?:\s+["'][^)]*["'])?\s*\)/g;
+    for (const match of line.matchAll(pattern)) {
+      const href = match[1];
+      if (href) links.push({ href, line: index + 1 });
+    }
+  }
+
+  return links;
+}
+
+function normalizedPathname(value: string): string {
+  if (value === "/") return value;
+  return value.replace(/\/+$/, "") || "/";
+}
+
+function deploymentIndependentPath(
+  config: DocsConfig,
+  pathname: string,
+): string {
+  const prefix = config.deploymentBasePath;
+  if (!prefix) return normalizedPathname(pathname);
+  if (pathname === prefix) return "/";
+  if (pathname.startsWith(`${prefix}/`)) {
+    return normalizedPathname(pathname.slice(prefix.length));
+  }
+  return normalizedPathname(pathname);
+}
+
+function isDocumentationPath(config: DocsConfig, pathname: string): boolean {
+  if (config.basePath === "/") return true;
+  return (
+    pathname === config.basePath || pathname.startsWith(`${config.basePath}/`)
+  );
+}
+
+function isPublicFile(config: DocsConfig, pathname: string): boolean {
+  const outputs = Object.values(config.outputs).map(normalizedPathname);
+  return outputs.includes(pathname) || path.posix.extname(pathname) !== "";
+}
+
+function validateInternalLinks(
+  config: DocsConfig,
+  sources: Array<{ page: DocsPage; source: string }>,
+): void {
+  const pagesByPath = new Map(
+    sources.map(({ page }) => [normalizedPathname(page.href), page]),
+  );
+  const headingsByPath = new Map(
+    sources.map(({ page, source }) => [
+      normalizedPathname(page.href),
+      new Set(extractHeadingIds(source)),
+    ]),
+  );
+  const issues: string[] = [];
+
+  for (const { page, source } of sources) {
+    for (const link of markdownLinks(source)) {
+      if (
+        link.href.startsWith("//") ||
+        /^[a-z][a-z0-9+.-]*:/i.test(link.href)
+      ) {
+        continue;
+      }
+
+      let target: URL;
+      try {
+        target = new URL(link.href, `https://sibl.invalid${page.href}`);
+      } catch {
+        issues.push(
+          `${page.source}:${link.line} has an invalid internal link: ${link.href}`,
+        );
+        continue;
+      }
+
+      const pathname = deploymentIndependentPath(config, target.pathname);
+      if (isPublicFile(config, pathname)) continue;
+      if (!isDocumentationPath(config, pathname)) continue;
+
+      const targetPage = pagesByPath.get(pathname);
+      if (!targetPage) {
+        issues.push(
+          `${page.source}:${link.line} links to a missing documentation page: ${link.href}`,
+        );
+        continue;
+      }
+
+      if (!target.hash) continue;
+      let headingId: string;
+      try {
+        headingId = decodeURIComponent(target.hash.slice(1));
+      } catch {
+        headingId = target.hash.slice(1);
+      }
+      if (!headingsByPath.get(pathname)?.has(headingId)) {
+        issues.push(
+          `${page.source}:${link.line} links to a missing heading in ${targetPage.source}: #${headingId}`,
+        );
+      }
+    }
+  }
+
+  if (issues.length > 0) {
+    throw new SiblContentError(
+      `Documentation link validation failed:\n- ${issues.join("\n- ")}`,
+    );
+  }
+}
+
 export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
   const rootDir = path.resolve(/* turbopackIgnore: true */ options.rootDir);
   const pages = flattenNavigation(config.navigation).map((item) =>
@@ -185,7 +324,7 @@ export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
       "",
       "## Full documentation",
       "",
-      `- [llms-full.txt](${config.siteUrl ? new URL(config.outputs.llmsFull, config.siteUrl).toString() : config.outputs.llmsFull}): Full text of every documentation page.`,
+      `- [llms-full.txt](${absolutePublicHref(config, config.outputs.llmsFull)}): Full text of every documentation page.`,
     );
 
     return `${lines.join("\n")}\n`;
@@ -219,13 +358,15 @@ export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
   }
 
   async function validate(): Promise<void> {
-    await Promise.all(
+    const sources = await Promise.all(
       pages.map(async (page) => {
         const source = await readPageSource(page);
         extractHeadings(source);
         stripMarkdown(source);
+        return { page, source };
       }),
     );
+    validateInternalLinks(config, sources);
   }
 
   async function writeOutputs(
@@ -275,9 +416,42 @@ export function createDocs(config: DocsConfig, options: CreateDocsOptions) {
 
 export type DocsSource = ReturnType<typeof createDocs>;
 
+export type DocsContentRegistry = Readonly<Record<string, unknown>>;
+
+/**
+ * Verifies that a statically imported MDX registry exactly matches navigation.
+ * Keeping this explicit lets Next.js discover every MDX module at build time.
+ */
+export function defineDocsContent<const T extends DocsContentRegistry>(
+  docs: Pick<DocsSource, "getPages">,
+  content: T,
+): T {
+  const expected = new Set(docs.getPages().map((page) => page.slug));
+  const actual = new Set(Object.keys(content));
+  const missing = [...expected].filter((slug) => !actual.has(slug));
+  const unexpected = [...actual].filter((slug) => !expected.has(slug));
+
+  if (missing.length === 0 && unexpected.length === 0) return content;
+
+  const displaySlug = (slug: string) => (slug === "" ? "<root>" : slug);
+  const details = [
+    missing.length > 0
+      ? `Missing MDX imports for: ${missing.map(displaySlug).join(", ")}.`
+      : "",
+    unexpected.length > 0
+      ? `Unexpected MDX imports for: ${unexpected.map(displaySlug).join(", ")}.`
+      : "",
+  ].filter(Boolean);
+
+  throw new SiblContentError(
+    `The MDX content registry does not match documentation navigation. ${details.join(" ")}`,
+  );
+}
+
 export type { DocsHeading } from "./markdown.js";
 export {
   cleanMdx,
+  extractHeadingIds,
   extractHeadings,
   slugifyHeading,
   stripMarkdown,

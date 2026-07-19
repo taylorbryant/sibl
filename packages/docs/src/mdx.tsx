@@ -6,7 +6,9 @@ import {
   type ReactNode,
 } from "react";
 import { Callout } from "./callout.js";
+import type { DocsConfig } from "./config.js";
 import { CopyButton } from "./copy-button.js";
+import { publicHref } from "./navigation.js";
 
 const codeLanguageLabels: Record<string, string> = {
   bash: "Shell",
@@ -52,19 +54,24 @@ function HeadingWithPermalink({
     <Element id={id} {...props}>
       {children}
       {id ? (
-        <a className="sibl-heading-permalink" href={`#${id}`}>
-          <span aria-hidden="true">#</span>
-          <span className="sibl-sr-only">
-            Link to {typeof children === "string" ? children : "section"}
-          </span>
-        </a>
+        // biome-ignore lint/a11y/useAnchorContent: CSS supplies the visible glyph and aria-label supplies the accessible name without changing heading textContent.
+        <a
+          aria-label={`Link to ${typeof children === "string" ? children : "section"}`}
+          className="sibl-heading-permalink"
+          href={`#${id}`}
+        />
       ) : null}
     </Element>
   );
 }
 
+export interface CreateMdxComponentsOptions {
+  config?: Pick<DocsConfig, "deploymentBasePath">;
+}
+
 export function createMdxComponents(
   components: MDXComponents = {},
+  options: CreateMdxComponentsOptions = {},
 ): MDXComponents {
   return {
     Callout,
@@ -108,10 +115,16 @@ export function createMdxComponents(
         <table {...props}>{children}</table>
       </div>
     ),
-    img: ({ alt = "", ...props }) => (
-      // biome-ignore lint/performance/noImgElement: Generic MDX images do not necessarily provide the dimensions or loader required by next/image.
-      <img alt={alt} {...props} />
-    ),
+    img: ({ alt = "", src, ...props }) => {
+      const resolvedSource =
+        typeof src === "string" && options.config
+          ? publicHref(options.config, src)
+          : src;
+      return (
+        // biome-ignore lint/performance/noImgElement: Generic MDX images do not necessarily provide the dimensions or loader required by next/image.
+        <img alt={alt} src={resolvedSource} {...props} />
+      );
+    },
     ...components,
   };
 }

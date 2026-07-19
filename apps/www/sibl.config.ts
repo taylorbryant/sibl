@@ -5,6 +5,7 @@ export default defineDocs({
   description:
     "Explicit, Next-native documentation primitives for people and agents.",
   basePath: "/docs",
+  deploymentBasePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
   navigation: [
     {

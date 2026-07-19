@@ -13,16 +13,22 @@ The manifest is deliberately more explicit than filesystem-derived navigation. M
 Next.js imports and compiles every MDX module. Sibl never evaluates MDX source at request time. A small content registry connects the manifest slug to the statically imported component:
 
 ```ts
+import type { ComponentType } from "react";
+import { defineDocsContent } from "@sibl/docs/server";
 import Overview from "@/content/docs/index.mdx";
 import Installation from "@/content/docs/installation.mdx";
+import { docs } from "@/lib/docs";
 
-export const content = {
-  "": Overview,
-  installation: Installation,
-};
+export const content: Record<string, ComponentType> = defineDocsContent(
+  docs,
+  {
+    "": Overview,
+    installation: Installation,
+  },
+);
 ```
 
-Sibl reads the raw source only when validating content or producing search and agent outputs.
+Sibl reads the raw source only when validating content or producing search and agent outputs. `defineDocsContent` fails when the registry and navigation differ, while `docs.validate()` reports missing source files, documentation pages, and heading anchors.
 
 ## The composable React surface
 

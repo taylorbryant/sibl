@@ -13,6 +13,7 @@ export {
   flattenNavigation,
   normalizeSlug,
   pageHref,
+  publicHref,
 } from "./navigation.js";
 export {
   makeSearchSnippet,

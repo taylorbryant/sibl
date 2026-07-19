@@ -92,7 +92,9 @@ describe("MDX components", () => {
     expect(markup).toContain('<h2 id="configuration">Configuration<a');
     expect(markup).toContain('class="sibl-heading-permalink"');
     expect(markup).toContain('href="#configuration"');
-    expect(markup).toContain("Link to Configuration");
+    expect(markup).toContain('aria-label="Link to Configuration"');
+    expect(markup).toContain('href="#configuration"></a>');
+    expect(markup).not.toContain(">#</a>");
     expect(markup).not.toContain('href="#configuration">Configuration</a>');
   });
 
@@ -128,5 +130,24 @@ describe("MDX components", () => {
     expect(multiline).toContain('class="sibl-code-actions"');
     expect(multiline).toContain("<span>TypeScript</span>");
     expect(multiline).toContain('aria-label="Copy code"');
+  });
+
+  test("prefixes root-relative MDX images for path-based deployments", () => {
+    const components: MDXComponents = createMdxComponents(
+      {},
+      { config: { deploymentBasePath: "/preview" } },
+    );
+    const Image = components.img as ComponentType<
+      ComponentPropsWithoutRef<"img">
+    >;
+    const localImage = renderToStaticMarkup(
+      <Image alt="Diagram" src="/diagram.svg" />,
+    );
+    const remoteImage = renderToStaticMarkup(
+      <Image alt="Diagram" src="https://example.com/diagram.svg" />,
+    );
+
+    expect(localImage).toContain('src="/preview/diagram.svg"');
+    expect(remoteImage).toContain('src="https://example.com/diagram.svg"');
   });
 });

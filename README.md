@@ -6,7 +6,7 @@ The package is intentionally a library rather than a framework. There is no wrap
 
 ## Status
 
-The published package is moving toward `0.2.0`, which refines the default visual shell around the production design it was extracted from.
+Sibl is pre-1.0 and ready for incremental adoption in existing Next.js documentation sites. Its explicit config, MDX registry, and content validation are designed to make migrations fail at build time instead of producing partial sites.
 
 ## Run the Sibl docs
 
@@ -23,6 +23,16 @@ Sibl's own MDX documentation.
 
 Set `NEXT_PUBLIC_SITE_URL` to the deployed origin to emit absolute canonical
 links in the sitemap and agent-readable outputs.
+
+If the application is deployed below an origin path, set
+`NEXT_PUBLIC_BASE_PATH` (for example, `/preview`) as well. The canonical app
+passes the same value to Next.js `basePath` and Sibl `deploymentBasePath`.
+
+To exercise the same integration as a prefixed static export, run:
+
+```bash
+SIBL_STATIC_EXPORT=1 NEXT_PUBLIC_BASE_PATH=/preview bun run build:docs
+```
 
 ## Install
 
@@ -89,13 +99,14 @@ Connect Sibl's default MDX elements through Next's ordinary provider file:
 // mdx-components.tsx
 import type { MDXComponents } from "mdx/types";
 import { createMdxComponents } from "@sibl/docs/mdx";
+import config from "@/sibl.config";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
-  return createMdxComponents(components);
+  return createMdxComponents(components, { config });
 }
 ```
 
-Pass overrides to `createMdxComponents` to replace any HTML element or add application components.
+Pass overrides to `createMdxComponents` to replace any HTML element or add application components. Supplying the config also prefixes root-relative MDX image URLs for path-based deployments.
 
 ## Define the documentation
 
@@ -109,6 +120,7 @@ export default defineDocs({
   title: "Acme",
   description: "Documentation for the Acme SDK.",
   basePath: "/docs",
+  deploymentBasePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",
   siteUrl: "https://docs.example.com",
   navigation: [
     {
@@ -146,13 +158,19 @@ MDX imports remain static and inspectable. A catch-all route can use a small con
 
 ```ts
 // lib/content.ts
+import type { ComponentType } from "react";
+import { defineDocsContent } from "@sibl/docs/server";
 import Introduction from "@/content/docs/index.mdx";
 import Installation from "@/content/docs/installation.mdx";
+import { docs } from "@/lib/docs";
 
-export const content = {
-  "": Introduction,
-  installation: Installation,
-};
+export const content: Record<string, ComponentType> = defineDocsContent(
+  docs,
+  {
+    "": Introduction,
+    installation: Installation,
+  },
+);
 ```
 
 ```tsx
@@ -162,7 +180,8 @@ import { DocsPage } from "@sibl/docs/react";
 import { content } from "@/lib/content";
 import { docs } from "@/lib/docs";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  await docs.validate();
   return docs.generateStaticParams();
 }
 
@@ -182,6 +201,33 @@ export default async function Page({ params }) {
 ```
 
 `DocsPage` is only a convenience composition and expects the MDX source to own its `# Title`. `DocsPageWithHeader` is the explicit manifest-rendered heading variant. Applications can independently use `DocsLayout`, `DocsArticle`, `DocsPageHeader`, `DocsPagination`, `DocsNavigation`, and `DocsTableOfContents`. The layout accepts custom brand, action, sidebar footer, and footer slots.
+
+`defineDocsContent` requires the static import registry to exactly match the
+manifest. `docs.validate()` checks that every source exists and that internal
+documentation links and heading fragments resolve. Calling it from
+`generateStaticParams` makes those checks part of `next build`.
+
+### Deploy below an origin path
+
+Keep documentation routing and deployment routing separate. `basePath`
+chooses where docs live inside the application; `deploymentBasePath` mirrors
+Next.js `basePath` when the entire application is hosted below a path:
+
+```ts
+// next.config.ts
+const deploymentBasePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(
+  /\/+$/,
+  "",
+);
+
+const nextConfig = {
+  basePath: deploymentBasePath || undefined,
+};
+```
+
+Sibl leaves Next `<Link>` destinations unprefixed so Next can handle them, and
+prefixes browser-fetched search data plus canonical agent-output URLs. Static
+output files are still written relative to the selected output directory.
 
 ### Preserve an existing product theme
 

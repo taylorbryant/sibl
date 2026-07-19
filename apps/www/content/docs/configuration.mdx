@@ -9,6 +9,7 @@ The config is both a runtime-validated object and the source of the public navig
 | `title` | required | Product or project name |
 | `description` | required | Site and agent-output summary |
 | `basePath` | `/docs` | Route prefix for documentation |
+| `deploymentBasePath` | `""` | Optional path where the entire Next application is deployed |
 | `siteUrl` | — | Optional origin for canonical agent links |
 | `links` | `[]` | Project links shown beside the sidebar controls |
 | `outputs` | standard paths | Locations for search and agent outputs |
@@ -37,6 +38,25 @@ Each section has a label and one or more page entries. A page entry maps its pub
 ```
 
 Slugs use lowercase URL segments such as `guides/deployment`. The root page uses an empty slug. Source paths must stay inside the application root.
+
+## Deployment paths
+
+`basePath` and `deploymentBasePath` solve different problems. `basePath` places documentation inside the application, such as `/docs`. `deploymentBasePath` mirrors Next.js `basePath` when the whole application is hosted below a path, such as `/preview`.
+
+```ts
+const deploymentBasePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(
+  /\/+$/,
+  "",
+);
+
+export default defineDocs({
+  // ...
+  basePath: "/docs",
+  deploymentBasePath,
+});
+```
+
+Pass the same value to `basePath` in `next.config.ts`. Sibl applies it to public search and agent-output URLs while leaving Next.js to prefix router links.
 
 ## Code highlighting
 

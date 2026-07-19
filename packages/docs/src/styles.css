@@ -421,6 +421,10 @@ body:has(> .sibl-root) {
     opacity 150ms ease;
 }
 
+.sibl-prose .sibl-heading-permalink::before {
+  content: "#";
+}
+
 .sibl-prose h2:hover > .sibl-heading-permalink,
 .sibl-prose h3:hover > .sibl-heading-permalink,
 .sibl-prose .sibl-heading-permalink:focus-visible {

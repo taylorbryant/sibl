@@ -27,6 +27,16 @@ export function pageHref(config: DocsConfig, slug: string): string {
   return `${config.basePath}/${normalized}`;
 }
 
+/** Prefixes a root-relative public asset or URL with the deployment path. */
+export function publicHref(
+  config: Pick<DocsConfig, "deploymentBasePath">,
+  href: string,
+): string {
+  if (!config.deploymentBasePath || !href.startsWith("/")) return href;
+  if (href === "/") return config.deploymentBasePath;
+  return `${config.deploymentBasePath}${href}`;
+}
+
 export function findNavigationItem(
   config: DocsConfig,
   slug: string | string[] | undefined,

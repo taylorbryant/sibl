@@ -34,9 +34,10 @@ Add the standard `mdx-components.tsx` provider:
 ```tsx
 import type { MDXComponents } from "mdx/types";
 import { createMdxComponents } from "@sibl/docs/mdx";
+import config from "@/sibl.config";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
-  return createMdxComponents(components);
+  return createMdxComponents(components, { config });
 }
 ```
 
@@ -71,3 +72,5 @@ export const docs = createDocs(config, { rootDir: process.cwd() });
 ```
 
 Sibl's own documentation app contains the complete catch-all route and explicit MDX registry. Nothing is generated into the application.
+
+Wrap that registry with `defineDocsContent(docs, content)` and call `await docs.validate()` from `generateStaticParams`. The production build will then fail if navigation, static MDX imports, source files, or internal links drift apart.

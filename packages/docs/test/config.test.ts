@@ -4,6 +4,7 @@ import {
   adjacentNavigationItems,
   flattenNavigation,
   pageHref,
+  publicHref,
 } from "../src/navigation.js";
 
 const input = {
@@ -29,6 +30,7 @@ describe("defineDocs", () => {
     const config = defineDocs(input);
 
     expect(config.basePath).toBe("/docs");
+    expect(config.deploymentBasePath).toBe("");
     expect(config.theme.mark).toBe("§");
     expect(config.theme.accent).toBe("#4f46e5");
     expect(config.theme.accentDark).toBe("#bd93f9");
@@ -113,6 +115,18 @@ describe("defineDocs", () => {
         },
       }),
     ).toThrow("Output paths cannot traverse");
+  });
+
+  test("normalizes deployment base paths", () => {
+    const config = defineDocs({ ...input, deploymentBasePath: "/project/" });
+
+    expect(config.deploymentBasePath).toBe("/project");
+    expect(publicHref(config, "/search-index.json")).toBe(
+      "/project/search-index.json",
+    );
+    expect(publicHref(config, "https://example.com/file.json")).toBe(
+      "https://example.com/file.json",
+    );
   });
 });
 

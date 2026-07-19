@@ -73,6 +73,17 @@ export const docsConfigSchema = z
         return value.replace(/\/+$/, "");
       })
       .default("/docs"),
+    deploymentBasePath: z
+      .string()
+      .regex(/^(?:|\/[a-z0-9/-]*)$/, {
+        message:
+          "deploymentBasePath must be empty or start with / and use lowercase URL segments",
+      })
+      .transform((value) => {
+        if (value === "" || value === "/") return "";
+        return value.replace(/\/+$/, "");
+      })
+      .default(""),
     siteUrl: z.string().url().optional(),
     navigation: z.array(navigationSectionSchema).min(1),
     links: z.array(linkSchema).default([]),

@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import type { DocsConfig, NavigationSection } from "./config.js";
-import { pageHref } from "./navigation.js";
+import { pageHref, publicHref } from "./navigation.js";
 import { SearchButton } from "./search-ui.js";
 import { ThemeToggle } from "./theme.js";
 import { DocsTableOfContents } from "./toc.js";
@@ -191,7 +191,7 @@ export function DocsLayout({
             {headerActions}
             {showSearch ? (
               <SearchButton
-                indexUrl={config.outputs.searchIndex}
+                indexUrl={publicHref(config, config.outputs.searchIndex)}
                 placeholder={config.search.placeholder}
               />
             ) : null}
@@ -236,7 +236,7 @@ export function DocsLayout({
         {showSearch ? (
           <SearchButton
             className="sibl-sidebar-search"
-            indexUrl={config.outputs.searchIndex}
+            indexUrl={publicHref(config, config.outputs.searchIndex)}
             placeholder={config.search.placeholder}
           />
         ) : null}

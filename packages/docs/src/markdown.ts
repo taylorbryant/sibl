@@ -6,6 +6,12 @@ export interface DocsHeading {
   text: string;
 }
 
+interface ParsedHeading {
+  depth: number;
+  id: string;
+  text: string;
+}
+
 function cleanInlineMarkdown(value: string): string {
   return value
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
@@ -19,8 +25,8 @@ export function slugifyHeading(value: string): string {
   return new GithubSlugger().slug(cleanInlineMarkdown(value));
 }
 
-export function extractHeadings(markdown: string): DocsHeading[] {
-  const headings: DocsHeading[] = [];
+function parseHeadings(markdown: string): ParsedHeading[] {
+  const headings: ParsedHeading[] = [];
   const slugger = new GithubSlugger();
   let inFence = false;
 
@@ -31,18 +37,50 @@ export function extractHeadings(markdown: string): DocsHeading[] {
     }
     if (inFence) continue;
 
-    const match = /^(#{2,3})\s+(.+?)\s*#*\s*$/.exec(line);
+    const match = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
     if (!match) continue;
 
     const text = cleanInlineMarkdown(match[2] ?? "");
     headings.push({
-      depth: (match[1]?.length ?? 2) as 2 | 3,
+      depth: match[1]?.length ?? 1,
       id: slugger.slug(text),
       text,
     });
   }
 
   return headings;
+}
+
+export function extractHeadings(markdown: string): DocsHeading[] {
+  return parseHeadings(markdown).filter(
+    (heading): heading is DocsHeading =>
+      heading.depth === 2 || heading.depth === 3,
+  );
+}
+
+export function extractHeadingIds(markdown: string): string[] {
+  return parseHeadings(markdown).map((heading) => heading.id);
+}
+
+function protectInlineCode(line: string): {
+  restore: (value: string) => string;
+  value: string;
+} {
+  const spans: string[] = [];
+  const value = line.replace(/(`+)(.+?)\1/g, (match) => {
+    const index = spans.push(match) - 1;
+    return `\u0000SIBL_INLINE_CODE_${index}\u0000`;
+  });
+
+  return {
+    value,
+    restore: (cleaned) =>
+      spans.reduce(
+        (restored, span, index) =>
+          restored.replace(`\u0000SIBL_INLINE_CODE_${index}\u0000`, span),
+        cleaned,
+      ),
+  };
 }
 
 export function cleanMdx(source: string): string {
@@ -71,7 +109,8 @@ export function cleanMdx(source: string): string {
       continue;
     }
 
-    let cleaned = line;
+    const protectedLine = protectInlineCode(line);
+    let cleaned = protectedLine.value;
     if (inComponentTag) {
       const close = cleaned.indexOf(">");
       if (close < 0) continue;
@@ -80,7 +119,7 @@ export function cleanMdx(source: string): string {
     }
 
     while (true) {
-      const open = cleaned.search(/<\/?[A-Z]/);
+      const open = cleaned.search(/<\/?[A-Za-z][A-Za-z0-9:.-]*(?=[\s/>])/);
       if (open < 0) break;
       const close = cleaned.indexOf(">", open);
       if (close < 0) {
@@ -91,7 +130,12 @@ export function cleanMdx(source: string): string {
       cleaned = `${cleaned.slice(0, open)} ${cleaned.slice(close + 1)}`;
     }
 
-    output.push(cleaned.replace(/\{\/\*[\s\S]*?\*\/\}/g, " ").trimEnd());
+    output.push(
+      protectedLine
+        .restore(cleaned)
+        .replace(/\{\/\*[\s\S]*?\*\/\}/g, " ")
+        .trimEnd(),
+    );
   }
 
   return output

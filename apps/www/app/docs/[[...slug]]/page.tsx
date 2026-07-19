@@ -1,3 +1,4 @@
+import { publicHref } from "@sibl/docs";
 import { DocsPage } from "@sibl/docs/react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -10,7 +11,8 @@ interface DocumentationPageProps {
   params: Promise<{ slug?: string[] }>;
 }
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  await docs.validate();
   return docs.generateStaticParams();
 }
 
@@ -48,7 +50,9 @@ export default async function DocumentationPage({
           <span>
             Created by <a href="https://taylor.page">Taylor Bryant</a>
           </span>
-          <a href="/llms.txt">llms.txt</a>
+          <a href={publicHref(docs.config, docs.config.outputs.llms)}>
+            llms.txt
+          </a>
         </>
       }
     >
